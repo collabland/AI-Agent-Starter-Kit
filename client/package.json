@@ -1,0 +1,32 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "predev": "node bin/validate-env",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.60.5",
+    "axios": "^1.7.7",
+    "next": "14.2.18",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.25.9",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.18",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}

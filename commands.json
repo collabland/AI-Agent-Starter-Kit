@@ -1,0 +1,12 @@
+{
+  "commands": {
+    "/ace": {
+      "description": "Switch to Collab.Land Ace personality",
+      "characterPath": "character.json"
+    },
+    "/eliza": {
+      "description": "Switch to default Eliza personality",
+      "characterPath": "default"
+    }
+  }
+}

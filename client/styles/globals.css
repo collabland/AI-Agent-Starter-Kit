@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  @apply w-full h-full p-0 m-0 text-primary bg-secondary;
+}
+
+#__next, main {
+  @apply w-full h-full;
+}
+
+@layer base {
+  .btn-primary {
+    @apply px-4 py-2 bg-accent text-primary border border-accent 
+           hover:bg-secondary hover:text-primary transition-all duration-200 
+           rounded-lg;
+  }
+  
+  .input-primary {
+    @apply px-4 py-2 bg-secondary text-primary border border-accent 
+           focus:outline-none focus:ring-1 focus:ring-primary 
+           rounded-lg;
+  }
+}

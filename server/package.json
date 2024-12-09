@@ -1,0 +1,41 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "predev": "node bin/validate-env",
+    "dev": "tsc-watch --noClear --onSuccess \"pnpm run www-dev\"",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint . --fix --config .eslintrc.json",
+    "www-dev": "node bin/www-dev"
+  },
+  "dependencies": {
+    "@ai16z/adapter-sqlite": "0.1.5-alpha.0",
+    "@ai16z/eliza": "0.1.5-alpha.0",
+    "@ai16z/plugin-bootstrap": "0.1.5-alpha.0",
+    "@grammyjs/conversations": "^1.2.0",
+    "@ngrok/ngrok": "^1.4.1",
+    "axios": "^1.7.7",
+    "better-sqlite3": "^11.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "grammy": "^1.32.0",
+    "tsc-watch": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.17.6",
+    "@types/node-fetch": "^2.6.11",
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
+    "eslint": "^8",
+    "typescript": "^5"
+  }
+}

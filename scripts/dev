@@ -1,0 +1,24 @@
+#! /usr/bin/env node
+
+const concurrently = require("concurrently");
+
+const { result } = concurrently([
+    {
+        command: "pnpm run dev:server",
+        name: "server",
+        prefix: "server",
+        prefixColor: "blue",
+        handleInput: true
+    },
+    {
+        command: "pnpm run dev:client",
+        name: "client",
+        prefix: "client",
+        prefixColor: "green",
+        handleInput: true
+    }
+]);
+
+result.catch((err) => {
+  console.error(err);
+});

@@ -1,0 +1,103 @@
+#!/usr/bin/env node
+
+import fs from "fs";
+import path from "path";
+import readline from "readline";
+import { promisify } from "util";
+
+// Define possible hints/values for different env vars
+const ENV_HINTS = {
+  PORT: "Enter the port number your API should run on, should be separate from the frontend port, usually 3001 or 8081",
+  NODE_ENV:
+    "Enter the environment your API should run on, usually 'development' or 'production'",
+  TELEGRAM_BOT_TOKEN:
+    "Enter your Telegram bot token, you can get it from BotFather, go to https://t.me/botfather to set it up",
+  OPENAI_API_KEY:
+    "Enter your OpenAI API key, you can get it from OpenAI, go to https://platform.openai.com/api-keys to create one",
+  NGROK_AUTH_TOKEN:
+    "Enter your ngrok auth token, you can get it from ngrok, go to https://dashboard.ngrok.com/get-started/setup to create one",
+  NGROK_DOMAIN:
+    "Enter your ngrok domain, you can get it for free from ngrok, go to https://dashboard.ngrok.com/domains to create one",
+  GAIANET_MODEL:
+    "Enter your Gaianet model, you can get it from Gaianet.AI, go to https://docs.gaianet.ai/user-guide/nodes to get the model details\n(Press Enter/Return to inject the default model)",
+  GAIANET_SERVER_URL:
+    "Enter your Gaianet server URL, you can get it from Gaianet.AI, go to https://docs.gaianet.ai/user-guide/nodes to get the server details\n(Press Enter/Return to inject the default server URL)",
+  GAIANET_EMBEDDING_MODEL:
+    "Enter your Gaianet embedding model, you can get it from Gaianet.AI, go to https://docs.gaianet.ai/user-guide/nodes to get the embedding model details\n(Press Enter/Return to inject the default embedding model)",
+  USE_GAIANET_EMBEDDING:
+    "Enter if you want to use Gaianet embedding, usually TRUE or FALSE\n(Press Enter/Return to inject the default value)",
+  JOKERACE_CONTRACT_ADDRESS:
+    "Enter your Jokerace contract address, you can get it from Jokerace, go to https://www.jokerace.io/contest/new to get the contract address",
+  // Add more hints as needed from .env.example
+};
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const question = promisify(rl.question).bind(rl);
+
+async function main() {
+  const envExamplePath = path.join(__dirname, "..", "..", ".env.example");
+  const envPath = path.join(__dirname, "..", "..", ".env");
+
+  // Read .env.example
+  const exampleContent = fs.readFileSync(envExamplePath, "utf8");
+  const envContent = fs.existsSync(envPath)
+    ? fs.readFileSync(envPath, "utf8")
+    : "";
+
+  // Parse variables
+  const exampleVars = exampleContent
+    .split("\n")
+    .filter((line) => line && !line.startsWith("#"))
+    .map((line) => line.split("=")[0]);
+
+  const existingVars = new Set(
+    envContent
+      .split("\n")
+      .filter((line) => line && !line.startsWith("#"))
+      .map((line) => line.split("=")[0])
+  );
+
+  // Collect missing variables
+  let newEnvContent = envContent;
+
+  for (const varName of exampleVars) {
+    if (!existingVars.has(varName)) {
+      const hint = ENV_HINTS[varName] ?? "No hint available";
+      console.log(`HINT: ${hint}`);
+      const value = await question(`[server] Enter value for ${varName}: `);
+      newEnvContent += `\n${varName}=${value ?? ""}`;
+    }
+  }
+  // Default Gaianet config
+  const defaultGaianetConfig = {
+    GAIANET_MODEL: "llama",
+    GAIANET_SERVER_URL: "https://llama8b.gaia.domains/v1",
+    GAIANET_EMBEDDING_MODEL: "nomic-embed",
+    USE_GAIANET_EMBEDDING: "TRUE",
+  };
+
+  // Inject defaults for empty Gaianet vars
+  const lines = newEnvContent.split("\n");
+  const updatedLines = lines.map((line) => {
+    const [key, value] = line.split("=");
+    if (
+      ((key && key.startsWith("GAIANET_")) ||
+        key === "USE_GAIANET_EMBEDDING") &&
+      (!value || value === "")
+    ) {
+      return `${key}=${defaultGaianetConfig[key]}`;
+    }
+    return line;
+  });
+  newEnvContent = updatedLines.join("\n");
+
+  // Save to .env
+  fs.writeFileSync(envPath, newEnvContent.trim() + "\n");
+  rl.close();
+}
+
+main().catch(console.error);

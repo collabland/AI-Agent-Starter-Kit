@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
+import fs from "fs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+console.log("Starting dev server...");
+const env = process.env.NODE_ENV || "development";
+
+let server;
+
+function startServer() {
+  console.log("Server environment:", env);
+  if (server) server.kill();
+  server = spawn("node", ["dist/index.js"]);
+  server.stdout.pipe(process.stdout);
+  server.stderr.pipe(process.stderr);
+}
+
+if (env !== "production") {
+  fs.watchFile(resolve(__dirname, "../../.env"), () => {
+    console.log(".env file changed, restarting server...");
+    startServer();
+  });
+}
+
+startServer();
+
+process.on("SIGTERM", () => {
+  if (server) server.kill();
+  process.exit(0);
+});
+
+process.on("SIGINT", () => {
+  if (server) server.kill();
+  process.exit(0);
+});

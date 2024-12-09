@@ -1,0 +1,24 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "predev": "pnpm --filter client run predev && pnpm --filter server run predev",
+    "dev": "node scripts/dev",
+    "dev:client": "pnpm --filter client run dev",
+    "dev:server": "pnpm --filter server run dev",
+    "build": "pnpm -r run build",
+    "start": "pnpm -r run start",
+    "lint": "pnpm -r run lint",
+    "clean": "rimraf node_modules **/node_modules **/dist **/.next **/next-env.d.ts"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@9.14.1"
+}

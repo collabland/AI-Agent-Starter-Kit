@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+const path = require("path");
+const readline = require("readline");
+const { promisify } = require("util");
+
+// Define possible hints/values for different env vars
+const ENV_HINTS = {
+  NEXT_PUBLIC_API_URL:
+    "Enter the URL your API should run on, usually http://localhost:3001 or http://localhost:8081",
+  // Add more hints as needed from .env.example
+};
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+const question = promisify(rl.question).bind(rl);
+
+async function main() {
+  const envExamplePath = path.join(__dirname, "..", ".env.example");
+  const envPath = path.join(__dirname, "..", ".env");
+
+  // Read .env.example
+  const exampleContent = fs.readFileSync(envExamplePath, "utf8");
+  const envContent = fs.existsSync(envPath)
+    ? fs.readFileSync(envPath, "utf8")
+    : "";
+
+  // Parse variables
+  const exampleVars = exampleContent
+    .split("\n")
+    .filter((line) => line && !line.startsWith("#"))
+    .map((line) => line.split("=")[0]);
+
+  const existingVars = new Set(
+    envContent
+      .split("\n")
+      .filter((line) => line && !line.startsWith("#"))
+      .map((line) => line.split("=")[0])
+  );
+
+  // Collect missing variables
+  let newEnvContent = envContent;
+
+  for (const varName of exampleVars) {
+    if (!existingVars.has(varName)) {
+      const hint = ENV_HINTS[varName] ?? "No hint available";
+      console.log(`HINT: ${hint}`);
+      const value = await question(`[client] Enter value for ${varName}: `);
+      newEnvContent += `\n${varName}=${value}`;
+    }
+  }
+
+  // Save to .env
+  fs.writeFileSync(envPath, newEnvContent.trim() + "\n");
+  rl.close();
+}
+
+main().catch(console.error);
