@@ -14,7 +14,7 @@ import { CollabLandBaseAction } from "./collabland.action.js";
 import { randomUUID } from "crypto";
 import { chainMap } from "../../utils.js";
 import { CollabLandWalletBalanceProvider } from "../providers/collabland-wallet-balance.provider.js";
-import { ethers } from "ethers";
+import { ethers, parseEther } from "ethers";
 
 // User: Hi
 // Agent: Hello, I'm a blockchain assistant, what chain would you want to look into?
@@ -204,6 +204,14 @@ export class SendETHAction extends CollabLandBaseAction {
           runtime: _runtime,
         });
         console.log("[SendETHAction] extractedFundData", extractedFundData);
+        //FIXME: Need to double-check canFund, since the AI can hallucinate
+        if (extractedFundData.canFund === false) {
+          const _canFund =
+            BigInt(parseEther(balance)) >=
+            BigInt(parseEther(extractedFundData.amount));
+          console.log("[SendETHAction] _canFund", _canFund);
+          extractedFundData.canFund = _canFund;
+        }
         if (
           !extractedFundData.canFund ||
           !extractedFundData.amount ||
@@ -230,7 +238,6 @@ export class SendETHAction extends CollabLandBaseAction {
           },
           createdAt: Date.now(),
           embedding: getEmbeddingZeroVector(),
-          unique: true,
         };
         console.log(
           "[SendETHAction] creating fundIntentMemory",
@@ -277,7 +284,7 @@ export class SendETHAction extends CollabLandBaseAction {
             status: "PENDING",
           },
         };
-        await onChainMemoryManager.createMemory(fundPendingMemory, true);
+        await onChainMemoryManager.createMemory(fundPendingMemory);
         _callback?.({
           text: `Your request to send ${extractedFundData.amount} ETH to ${extractedFundData.account} has been sent from my account ${account.smartAccount} on ${chain}.\nStatus: Pending\nUser Operation Hash: ${_resData.userOperationHash}`,
         });
@@ -316,7 +323,7 @@ export class SendETHAction extends CollabLandBaseAction {
             txHash: _userOpReceiptData.receipt?.transactionHash,
             status: "EXECUTED",
           },
-        });
+        }, true);
         _callback?.({
           text: `Your request to send ${extractedFundData.amount} ETH to ${extractedFundData.account} has been sent from my account ${account.smartAccount} on ${chain}.\nStatus: Executed\nUser Operation Hash: ${_userOpReceiptData.userOpHash}\nTransaction Hash: ${_userOpReceiptData.receipt?.transactionHash}`,
         });
