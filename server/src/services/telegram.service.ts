@@ -8,7 +8,7 @@ import {
   TokenMetadata,
 } from "../utils.js";
 import fs from "fs";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse, isAxiosError } from "axios";
 import { parse as jsoncParse } from "jsonc-parser";
 export class TelegramService extends BaseService {
   private static instance: TelegramService;
@@ -101,14 +101,15 @@ export class TelegramService extends BaseService {
               },
             }
           );
-          console.log("Mint response from Collab.Land:", _tokenData);
+          console.log("Mint response from Collab.Land:");
+          console.dir(_tokenData, { depth: null });
           const tokenData = _tokenData.response.contract.fungible;
           ctx.reply(
-            `Your token has been minted on Wow.xyz 🥳\n Details: \`\`\`json\n${JSON.stringify(
-              tokenData,
-              null,
-              2
-            )}\n\`\`\``,
+            `Your token has been minted on wow.xyz 🥳
+Token details:
+<pre><code class="language-json">${JSON.stringify(tokenData, null, 2)}</code></pre>
+
+You can view the token page below (it takes a few minutes to be visible)`,
             {
               reply_markup: {
                 inline_keyboard: [
@@ -120,10 +121,15 @@ export class TelegramService extends BaseService {
                   ],
                 ],
               },
+              parse_mode: "HTML",
             }
           );
         } catch (error) {
-          console.error("Failed to mint token:", error);
+          if (isAxiosError(error)) {
+            console.error("Failed to mint token:", error.response?.data);
+          } else {
+            console.error("Failed to mint token:", error);
+          }
           ctx.reply("Failed to mint token");
         }
       });
