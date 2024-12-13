@@ -30,6 +30,10 @@ const ENV_HINTS = {
     "Enter if you want to use Gaianet embedding, usually TRUE or FALSE\n(Press Enter/Return to inject the default value)",
   JOKERACE_CONTRACT_ADDRESS:
     "Enter your Jokerace contract address, you can get it from Jokerace, go to https://www.jokerace.io/contest/new to get the contract address",
+  ELIZA_CHARACTER_PATH:
+    "Enter your Eliza character path, if you are using a custom character.\n(Press Enter/Return to inject the default character path)",
+  TOKEN_DETAILS_PATH:
+    "Enter your WOW.XYZ ERC20 token details JSON path, if you are using a custom token details.\n(Press Enter/Return to inject the default token details path)",
   // Add more hints as needed from .env.example
 };
 
@@ -74,24 +78,22 @@ async function main() {
       newEnvContent += `\n${varName}=${value ?? ""}`;
     }
   }
-  // Default Gaianet config
-  const defaultGaianetConfig = {
+  // Default config
+  const defaultConfig = {
     GAIANET_MODEL: "llama",
     GAIANET_SERVER_URL: "https://llama8b.gaia.domains/v1",
     GAIANET_EMBEDDING_MODEL: "nomic-embed",
     USE_GAIANET_EMBEDDING: "TRUE",
+    ELIZA_CHARACTER_PATH: "character.json",
+    TOKEN_DETAILS_PATH: "token_metadata.example.jsonc",
   };
 
-  // Inject defaults for empty Gaianet vars
+  // Inject defaults for empty vars
   const lines = newEnvContent.split("\n");
   const updatedLines = lines.map((line) => {
     const [key, value] = line.split("=");
-    if (
-      ((key && key.startsWith("GAIANET_")) ||
-        key === "USE_GAIANET_EMBEDDING") &&
-      (!value || value === "")
-    ) {
-      return `${key}=${defaultGaianetConfig[key]}`;
+    if (key && defaultConfig[key] && (!value || value === "")) {
+      return `${key}=${defaultConfig[key]}`;
     }
     return line;
   });

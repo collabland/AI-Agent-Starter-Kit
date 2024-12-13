@@ -50,3 +50,7 @@ next-env.d.ts
 dist
 pnpm-lock.yaml
 *.sqlite
+
+# token metadata
+token.jsonc
+token.json

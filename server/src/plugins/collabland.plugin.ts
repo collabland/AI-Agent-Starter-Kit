@@ -14,4 +14,3 @@ export const collablandPlugin: Plugin = {
   ],
   providers: [new CollabLandWalletBalanceProvider()],
 };
-

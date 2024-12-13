@@ -308,22 +308,25 @@ export class SendETHAction extends CollabLandBaseAction {
           _userOpReceiptData
         );
         await onChainMemoryManager.removeMemory(fundPendingMemory.id!);
-        await onChainMemoryManager.createMemory({
-          id: randomUUID(),
-          agentId: _message.agentId,
-          userId: _message.userId,
-          roomId: _message.roomId,
-          content: {
-            text: "",
-            chain: chain,
-            account: extractedFundData.account,
-            amount: extractedFundData.amount,
-            canFund: extractedFundData.canFund,
-            userOpHash: _resData.userOperationHash,
-            txHash: _userOpReceiptData.receipt?.transactionHash,
-            status: "EXECUTED",
+        await onChainMemoryManager.createMemory(
+          {
+            id: randomUUID(),
+            agentId: _message.agentId,
+            userId: _message.userId,
+            roomId: _message.roomId,
+            content: {
+              text: "",
+              chain: chain,
+              account: extractedFundData.account,
+              amount: extractedFundData.amount,
+              canFund: extractedFundData.canFund,
+              userOpHash: _resData.userOperationHash,
+              txHash: _userOpReceiptData.receipt?.transactionHash,
+              status: "EXECUTED",
+            },
           },
-        }, true);
+          true
+        );
         _callback?.({
           text: `Your request to send ${extractedFundData.amount} ETH to ${extractedFundData.account} has been sent from my account ${account.smartAccount} on ${chain}.\nStatus: Executed\nUser Operation Hash: ${_userOpReceiptData.userOpHash}\nTransaction Hash: ${_userOpReceiptData.receipt?.transactionHash}`,
         });
