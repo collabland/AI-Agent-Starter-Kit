@@ -238,9 +238,9 @@ cp token_metadata.example.jsonc token.jsonc
   "symbol": "TOKEN", // Token symbol (2-6 chars)
   "description": "Your token description", 
   "websiteLink": "https://yoursite.com",
-  "twitter": "https://x.com/your_handle",
+  "twitter": "your_twitter_handle",
   "discord": "https://discord.gg/your_server", 
-  "telegram": "https://t.me/your_bot",
+  "telegram": "your_bot_telegram_username",
   "nsfw": false,
   "image": "ipfs://your_ipfs_hash" // Upload image to IPFS first
 }

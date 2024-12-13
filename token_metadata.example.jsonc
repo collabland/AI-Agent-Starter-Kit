@@ -3,9 +3,9 @@
   "symbol": "AGENT", // Symbol of the token
   "description": "CollabAI is an AI memecoin launched using the Collab.Land AI Agent Starter Kit - https://github.com/collabland/AI-Agent-Starter-Kit. Collab.Land empowers communities to build and coordinate with AI-led agents. By using the Collab.Land AI Agent Starter Kit, CollabAI ensures interoperability and transparency in agent development, driving innovation across web3 ecosystems.", // Description of the token
   "websiteLink": "https://collab.land/", // Website link of the token
-  "twitter": "https://x.com/collab_land_", // Twitter handle of the token
+  "twitter": "collab_land_", // Twitter handle of the token
   "discord": "https://discord.gg/collabland", // Discord link of the token
-  "telegram": "https://t.me/collablandbot", // Telegram link of the bot handling the token
+  "telegram": "collablandbot", // Telegram username of the bot handling the token
   "nsfw": false, // NSFW flag of the token
   "image": "ipfs://bafybeiaa5v7jjcpj453vwdch4ykhu6fkczrtmc2l2gnapdyr33suxdal5e" // Image of the token, should be uploaded to IPFS
 }
