@@ -69,7 +69,7 @@ pnpm run dev
 │   │   └── www-dev        # Development server launcher
 │   └── tsconfig.json       # TypeScript configuration
 │
-├── 📜 scripts/             # Project scripts
+├── ��� scripts/             # Project scripts
 │   └── dev                 # Concurrent dev servers launcher
 │
 ├── 📝 .env.example         # Root environment variables example for server
@@ -215,13 +215,48 @@ const ENV_HINTS = {
 ### 🎨 Frontend Components
 
 1. Create component in client/components/
-2. Use Tailwind CSS for styling ✨
+2. Use Tailwind CSS for styling ��
 3. Follow existing patterns for API integration
 
 ### ⚙️ Backend Middleware
 
 1. Create middleware in server/src/middleware/
 2. Apply globally or per-route basis
+
+### 🪙 Minting Tokens
+
+1. Copy the token metadata template:
+
+```bash
+cp token_metadata.example.jsonc token.jsonc
+```
+
+2. Edit `token.jsonc` with your token details:
+```jsonc
+{
+  "name": "YourToken", // Token name
+  "symbol": "TOKEN", // Token symbol (2-6 chars)
+  "description": "Your token description", 
+  "websiteLink": "https://yoursite.com",
+  "twitter": "https://x.com/your_handle",
+  "discord": "https://discord.gg/your_server", 
+  "telegram": "https://t.me/your_bot",
+  "nsfw": false,
+  "image": "ipfs://your_ipfs_hash" // Upload image to IPFS first
+}
+```
+
+3. Update `.env` to point to your token file:
+```env
+TOKEN_DETAILS_PATH=token.jsonc
+```
+
+4. Start your bot and use the `/mint` command in Telegram. The bot will:
+- Read your token config
+- Mint on Base Sepolia testnet
+- Return contract details and token page URL
+
+> Note: Make sure you have set up your COLLABLAND_API_KEY and TELEGRAM_BOT_TOKEN in .env first.
 
 ## 📚 Sources
 
