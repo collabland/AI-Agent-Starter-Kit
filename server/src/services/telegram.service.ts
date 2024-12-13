@@ -48,6 +48,43 @@ export class TelegramService extends BaseService {
         console.error("Telegram bot error:", error);
       });
       await this.elizaService.start();
+
+      this.bot.command("mint", async (ctx) => {
+        ctx.reply("Minting...");
+        const tokenInfo = {
+          symbol: "TODO: Token Symbol",
+          name: "TODO: Token Name",
+          metadata: {
+            // media: "TODO: add media url",
+            description: "TODO: add description",
+            website_link: "https://wow.xyz",
+            twitter: "TODO: add twitter link",
+            discord: "TODO: add discord link",
+            telegram: "TODO: add telegram link",
+          },
+        };
+        console.log("TokenInfoToMint", tokenInfo);
+        // use fetch to call collabland backend to mint token and send response to telegram and log response
+        const response = await fetch(
+          "http://https://api-qa.collab.land/accountkit/telegrambot/mint?chainId=8453",
+          {
+            method: "POST",
+            headers: {
+              "X-API-KEY": process.env.COLLABLAND_API_KEY || "",
+              "X-TG-BOT-TOKEN": process.env.TELEGRAM_BOT_TOKEN || "",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(tokenInfo),
+          }
+        );
+        const data = await response.json();
+        console.log(data);
+        // ctx.reply(JSON.stringify(data));
+        // TODO: add a link to the token on the website
+
+        // @ts-expect-error
+        ctx.reply(`Minting completed, ${data.response.fungible.address}`);
+      });
     } catch (error) {
       console.error("Failed to start Telegram bot:", error);
       throw error;
