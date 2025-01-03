@@ -182,6 +182,19 @@ export class GetChainAction extends CollabLandBaseAction {
             action: "EXTRACT_CHAIN",
           },
         },
+        {
+          user: "{{user1}}",
+          content: {
+            text: "What is your account on solana?",
+          },
+        },
+        {
+          user: "{{agentName}}",
+          content: {
+            text: "",
+            action: "EXTRACT_CHAIN",
+          },
+        },
       ],
     ];
     super(name, description, similes, examples, handler, validate);

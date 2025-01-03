@@ -3,6 +3,7 @@ import { GetBotAccountAction } from "./actions/get-bot-account.action.js";
 import { GetChainAction } from "./actions/get-chain.action.js";
 import { CollabLandWalletBalanceProvider } from "./providers/collabland-wallet-balance.provider.js";
 import { SendETHAction } from "./actions/send-eth.action.js";
+import { CollabLandSolanaWalletBalanceProvider } from "./providers/collabland-solana-wallet-balance.provider.js";
 export const collablandPlugin: Plugin = {
   name: "collabland",
   description: "Integrate Collab.Land smart account for the bot",
@@ -12,5 +13,8 @@ export const collablandPlugin: Plugin = {
     new GetBotAccountAction(),
     new SendETHAction(),
   ],
-  providers: [new CollabLandWalletBalanceProvider()],
+  providers: [
+    new CollabLandWalletBalanceProvider(),
+    new CollabLandSolanaWalletBalanceProvider(),
+  ],
 };
