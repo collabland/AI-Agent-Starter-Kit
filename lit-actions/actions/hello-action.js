@@ -1830,7 +1830,10 @@
     console.log("[action] permittedAuthMethods:", permittedAuthMethods);
     const signature = await Lit.Actions.signEcdsa({ publicKey, toSign, sigName });
     Lit.Actions.setResponse({
-      response: JSON.stringify({ HelloName: helloName, timestamp: Date.now().toString() })
+      response: JSON.stringify({
+        HelloName: helloName,
+        timestamp: Date.now().toString()
+      })
     });
     return signature;
   };

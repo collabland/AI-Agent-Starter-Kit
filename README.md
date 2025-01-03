@@ -368,3 +368,174 @@ Example:
 git commit -m "feat: add OAuth support for Discord"
 git commit -m "fix: resolve token validation issue"
 ```
+
+## 🔥 Developing Lit Actions
+
+### Setup
+
+1. Navigate to lit-actions directory:
+
+```bash
+cd lit-actions
+pnpm install
+```
+
+2. Configure environment:
+
+```bash
+cp .env.example .env
+```
+
+Required variables:
+
+- `PINATA_JWT`: Your Pinata JWT for IPFS uploads
+- `PINATA_URL`: Pinata gateway URL
+
+### Development Workflow
+
+1. Create new action in `src/actions/`:
+
+```typescript
+/// <reference path="../global.d.ts" />
+
+const go = async () => {
+  // Access Lit SDK APIs
+  const tokenId = await Lit.Actions.pubkeyToTokenId({ publicKey });
+
+  // Sign data
+  const signature = await Lit.Actions.signEcdsa({
+    publicKey,
+    toSign,
+    sigName,
+  });
+
+  // Return response
+  Lit.Actions.setResponse({
+    response: JSON.stringify({ result: "success" }),
+  });
+};
+
+go();
+```
+
+2. Start development server:
+
+```bash
+pnpm run dev
+```
+
+This will:
+
+- Build TypeScript → JavaScript
+- Bundle with dependencies
+- Inject SDK shims
+- Upload to IPFS
+- Watch for changes
+
+### Adding SDK Shims
+
+1. Create shim in `shims/`:
+
+```javascript
+// shims/my-sdk.shim.js
+import { MySDK } from "my-sdk";
+globalThis.MySDK = MySDK;
+```
+
+2. Update types in `src/global.d.ts`:
+
+```typescript
+declare global {
+  const MySDK: typeof MySDK;
+}
+```
+
+### Building & Deployment
+
+```bash
+# Build only
+pnpm run build
+
+# Build & deploy to IPFS
+pnpm run start
+```
+
+IPFS hashes are saved to `actions/ipfs.json`:
+
+```json
+{
+  "my-action.js": {
+    "IpfsHash": "Qm...",
+    "PinSize": 12345,
+    "Timestamp": "2025-01-03T..."
+  }
+}
+```
+
+### Available APIs
+
+The Lit Actions runtime provides:
+
+- **Lit.Actions**
+
+  - `signEcdsa()`: Sign data with PKP
+  - `pubkeyToTokenId()`: Convert public key to token ID
+  - `getPermittedAuthMethods()`: Get permitted auth methods
+  - `checkConditions()`: Check access control conditions
+  - `setResponse()`: Return data to client
+  - Full API in `src/global.d.ts`
+
+- **Built-in SDKs**
+  - `ethers`: Ethereum interactions
+  - `Buffer`: Buffer utilities
+
+### Best Practices
+
+1. **Type Safety**
+
+   - Always reference `global.d.ts`
+   - Define types for parameters
+   - Use TypeScript features
+
+2. **SDK Management**
+
+   - Create minimal shims
+   - Document SDK versions
+   - Test SDK compatibility
+
+3. **Action Structure**
+
+   - One action per file
+   - Clear async/await flow
+   - Proper error handling
+
+4. **Deployment**
+   - Test locally first
+   - Verify IPFS uploads
+   - Keep actions small
+
+### Scripts
+
+```bash
+pnpm run dev        # Development mode
+pnpm run build     # Build actions
+pnpm run start     # Deploy to IPFS
+pnpm run lint      # Fix code style
+pnpm run watch     # Watch mode
+```
+
+### Project Structure
+
+```
+lit-actions/
+├── actions/           # Built JS + IPFS hashes
+├── shims/            # SDK shims
+├── src/
+│   ├── actions/      # TypeScript sources
+│   ├── global.d.ts   # Type definitions
+│   └── index.ts      # IPFS deployment
+├── esbuild.js        # Build config
+└── package.json
+```
+
+For more details, check the [Lit Protocol docs](https://developer.litprotocol.com/v3/).

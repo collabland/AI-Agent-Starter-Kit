@@ -1,9 +1,8 @@
 {
   "hello-action.js": {
-    "IpfsHash": "QmZJB6qEpffgXELBdD2gwMrXMLimZnjfj7c5Q9zCoxrEN2",
-    "PinSize": 69875,
-    "Timestamp": "2025-01-03T10:34:38.264Z",
-    "isDuplicate": true,
-    "Duration": 4.685
+    "IpfsHash": "QmXaaTfqrKg7C2eycEsn1o5YV3FAiXm7kmEoWemT27osFf",
+    "PinSize": 69897,
+    "Timestamp": "2025-01-03T12:04:26.393Z",
+    "Duration": 4.147
   }
 }
