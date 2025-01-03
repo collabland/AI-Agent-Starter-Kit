@@ -32,6 +32,7 @@ export abstract class CollabLandBaseAction implements Action {
   }
 
   protected handleError(error: AnyType): void {
+    console.log(error);
     if (axios.isAxiosError(error)) {
       console.dir(error.response?.data, { depth: null });
       throw new Error(

@@ -27,6 +27,10 @@ export type ExecuteUserOpResponse = {
   chainId: number;
 };
 
+export type ExecuteSolanaTransactionResponse = {
+  txSignature: string;
+};
+
 export interface TransactionReceipt {
   transactionHash?: string;
   transactionIndex?: number;
