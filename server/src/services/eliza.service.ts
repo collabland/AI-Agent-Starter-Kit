@@ -1,4 +1,5 @@
 import { BaseService } from "./base.service.js";
+import { StorageService } from "./storage.service.js";
 import {
   AgentRuntime,
   Character,
@@ -161,10 +162,12 @@ export class MessageManager {
   public bot: Bot<Context>;
   private runtime: IAgentRuntime;
   private imageService: IImageDescriptionService;
+  private storageService: StorageService;
 
   constructor(bot: Bot<Context>, runtime: IAgentRuntime) {
     this.bot = bot;
     this.runtime = runtime;
+    this.storageService = StorageService.getInstance();
   }
 
   // Process image messages and generate descriptions
@@ -320,6 +323,8 @@ export class MessageManager {
       return null;
     }
     console.log("[_generateResponse] check3");
+    // store the response in the database
+
     await this.runtime.databaseAdapter.log({
       body: { message, context, response },
       userId: userId,
@@ -355,6 +360,7 @@ export class MessageManager {
     try {
       // Convert IDs to UUIDs
       const userId = stringToUuid(ctx.from.id.toString()) as UUID;
+      this.storageService.start();
       const userName =
         ctx.from.username || ctx.from.first_name || "Unknown User";
       const chatId = stringToUuid(
@@ -395,17 +401,19 @@ export class MessageManager {
         return; // Skip if no content
       }
 
+      // get additional context from the database
+
       const content: Content = {
         text: fullText,
         source: "telegram",
-        // inReplyTo:
-        //     "reply_to_message" in message && message.reply_to_message
-        //         ? stringToUuid(
-        //               message.reply_to_message.message_id.toString() +
-        //                   "-" +
-        //                   this.runtime.agentId
-        //           )
-        //         : undefined,
+        inReplyTo:
+          "reply_to_message" in message && message.reply_to_message
+            ? stringToUuid(
+                message.reply_to_message.message_id.toString() +
+                  "-" +
+                  this.runtime.agentId
+              )
+            : undefined,
       };
 
       // Create memory for the message
@@ -420,6 +428,8 @@ export class MessageManager {
       };
 
       await this.runtime.messageManager.createMemory(memory);
+      const res = await this.storageService.storeMessage(memory);
+      console.log("storeMessage response", res);
       // Update state with the new memory
       let state = await this.runtime.composeState(memory);
       state = await this.runtime.updateRecentMessageState(state);
@@ -428,6 +438,9 @@ export class MessageManager {
 
       if (shouldRespond) {
         // Generate response
+        const additionalContext =
+          await this.storageService.getContext(fullText);
+        console.log("[handleMessage] additionalContext", additionalContext);
         const context = composeContext({
           state,
           template:
@@ -474,6 +487,9 @@ export class MessageManager {
               createdAt: sentMessage.date * 1000,
               embedding: getEmbeddingZeroVector(),
             };
+
+            const res = await this.storageService.storeMessage(memory);
+            console.log("storeMessage response", res);
 
             // Set action to CONTINUE for all messages except the last one
             // For the last message, use the original action from the response content
