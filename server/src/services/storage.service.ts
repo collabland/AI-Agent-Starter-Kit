@@ -19,6 +19,7 @@ import { OrbisKeyDidAuth } from "@useorbis/db-sdk/auth";
 type ServerMessage = Memory & {
   content: Content | string;
   createdAt: string;
+  is_user: boolean;
 };
 
 const accessControlConditions = [
@@ -99,7 +100,6 @@ export class Orbis {
   } | null> {
     await this.getAuthenticatedInstance();
     const result = await this.db.select().raw(text).run();
-    console.log("result from orbis:", result);
     return result as {
       columns: Array<string>;
       rows: ServerMessage[];
@@ -307,7 +307,10 @@ export class StorageService extends BaseService {
     return { chunks, embeddingsArrays };
   }
 
-  public async storeMessage(context: Memory): Promise<CeramicDocument[]> {
+  public async storeMessage(
+    context: Memory,
+    is_user: boolean
+  ): Promise<CeramicDocument[]> {
     if (!this.orbis) {
       throw new Error("Orbis is not initialized");
     }
@@ -331,11 +334,11 @@ export class StorageService extends BaseService {
           content: JSON.stringify(encryptedBody),
           embedding: embeddingsArrays[idx],
           createdAt: new Date().toISOString(),
+          is_user,
         };
 
         const doc = await this.orbis.updateOrbis(content as ServerMessage);
         documents.push(doc);
-        console.log("Stored message:", content);
       }
       return documents;
     } catch (error: AnyType) {
@@ -368,13 +371,12 @@ export class StorageService extends BaseService {
       );
       const formattedEmbedding = `ARRAY[${array.join(", ")}]::vector`;
       const query = `
-            SELECT content, embedding <=> ${formattedEmbedding} AS similarity
+            SELECT content, is_user, embedding <=> ${formattedEmbedding} AS similarity
             FROM ${process.env.TABLE_ID}
             ORDER BY similarity ASC
             LIMIT 5;
             `;
       const context = await this.orbis.query(query);
-      console.log("context from orbis:", context);
 
       if (!context) {
         return null;
@@ -390,7 +392,9 @@ export class StorageService extends BaseService {
             ciphertext,
             dataToEncryptHash
           );
-          return decryptedContent;
+          // indicate if the message is from the user or the server
+          return `
+          ${row.is_user ? "User" : "Bot"}: ${decryptedContent}`;
         })
       );
       const concatenatedContext = decryptedRows.join(" ");

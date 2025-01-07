@@ -428,8 +428,7 @@ export class MessageManager {
       };
 
       await this.runtime.messageManager.createMemory(memory);
-      const res = await this.storageService.storeMessage(memory);
-      console.log("storeMessage response", res);
+      await this.storageService.storeMessage(memory, true);
       // Update state with the new memory
       let state = await this.runtime.composeState(memory);
       state = await this.runtime.updateRecentMessageState(state);
@@ -438,9 +437,9 @@ export class MessageManager {
 
       if (shouldRespond) {
         // Generate response
-        const additionalContext =
-          await this.storageService.getContext(fullText);
-        console.log("[handleMessage] additionalContext", additionalContext);
+        // const additionalContext =
+        await this.storageService.getContext(fullText);
+        // todo: add additional context to the message
         const context = composeContext({
           state,
           template:
@@ -488,8 +487,7 @@ export class MessageManager {
               embedding: getEmbeddingZeroVector(),
             };
 
-            const res = await this.storageService.storeMessage(memory);
-            console.log("storeMessage response", res);
+            await this.storageService.storeMessage(memory, false);
 
             // Set action to CONTINUE for all messages except the last one
             // For the last message, use the original action from the response content
