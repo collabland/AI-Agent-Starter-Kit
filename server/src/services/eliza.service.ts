@@ -438,7 +438,8 @@ export class MessageManager {
       if (shouldRespond) {
         // Generate response
         // const additionalContext =
-        await this.storageService.getContext(fullText);
+        const conversation = await this.storageService.getConversation();
+        console.log("[handleMessage] conversation", conversation);
         // todo: add additional context to the message
         const context = composeContext({
           state,
