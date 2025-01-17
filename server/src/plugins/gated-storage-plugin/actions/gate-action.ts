@@ -45,6 +45,21 @@ export const gateDataAction: Action = {
         },
       },
     ],
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "I have important data to encrypt",
+        } as GateActionContent,
+      },
+      {
+        user: "{{agentName}}",
+        content: {
+          text: "Gating data now...",
+          action: "GATE_DATA",
+        },
+      },
+    ],
   ],
 
   validate: async (
@@ -58,6 +73,8 @@ export const gateDataAction: Action = {
         message,
         _state
       );
+      console.log("[gate-action] validate result ", evaluator);
+      // return true;
       if (typeof evaluator === "boolean") {
         return evaluator;
       }

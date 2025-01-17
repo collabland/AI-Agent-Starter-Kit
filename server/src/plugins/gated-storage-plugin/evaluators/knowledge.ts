@@ -18,7 +18,6 @@ export const formatFacts = (facts: Memory[]) => {
 };
 
 export const knowledgeEvaluator: Evaluator = {
-  alwaysRun: true,
   description: "Knowledge evaluator for checking important content in memory",
   similes: ["knowledge checker", "memory evaluator"],
   examples: [
@@ -27,7 +26,7 @@ export const knowledgeEvaluator: Evaluator = {
     {{user1}}: Programmer and decentralized compute specialist.
     {{agentName}}: Agent user interacting with the user.
 
-    Facts about the actors:
+    Interesting facts about the actors:
     None`,
       messages: [
         {
@@ -43,16 +42,16 @@ export const knowledgeEvaluator: Evaluator = {
           },
         },
       ] as ActionExample[],
-      outcome: `{ "knowledge": "You can use Lit Actions to perform PKP signing, encryption, and decryption", "type": "fact", "already_known": false },`,
+      outcome: "TRUE",
     },
   ],
-  handler: async (runtime: IAgentRuntime, memory: Memory, _state?: State) => {
-    const context = `
-        Determine if the memory contains important content that reveals subject-matter expertise. Answer only with the following responses:
-        - TRUE
-        - FALSE
-        The following is the memory content: ${memory.content.text}
-        `;
+  handler: async (runtime: IAgentRuntime, memory: Memory, state?: State) => {
+    const context = `${knowledgeEvaluator.examples}
+    Determine if the memory contains important content that reveals subject-matter expertise. Answer only with the following responses:
+    - TRUE
+    - FALSE
+    The following is the memory content: ${memory.content.text}
+    `;
     // prompt the agent to determine if the memory contains important content
     const res = await generateText({
       runtime,
