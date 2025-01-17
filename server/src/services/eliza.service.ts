@@ -499,6 +499,11 @@ export class MessageManager {
         state = await this.runtime.updateRecentMessageState(state);
 
         // Handle any resulting actions
+        console.log("[eliza.service] evaluating");
+        const data = await this.runtime.evaluate(memory, state, shouldRespond);
+        console.log("[eliza.service] evaluated", data);
+
+        console.log("[eliza.service] processing resulting actions");
         await this.runtime.processActions(
           memory,
           responseMessages,
@@ -506,8 +511,6 @@ export class MessageManager {
           callback
         );
       }
-
-      await this.runtime.evaluate(memory, state, shouldRespond);
     } catch (error) {
       console.error("❌ Error handling message:", error);
       console.error("Error sending message:", error);

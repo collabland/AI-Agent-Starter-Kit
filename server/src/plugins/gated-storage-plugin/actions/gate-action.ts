@@ -59,7 +59,7 @@ export const gateDataAction: Action = {
         _state
       );
       if (typeof evaluator === "boolean") {
-        return true;
+        return evaluator;
       }
       return false;
     } catch {

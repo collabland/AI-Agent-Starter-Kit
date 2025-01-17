@@ -61,14 +61,16 @@ export const knowledgeEvaluator: Evaluator = {
     });
     elizaLogger.log("Response from the agent:", res);
 
+    const important = res === "TRUE" ? true : false;
     // Example evaluation logic
-    if (res === "TRUE") {
-      elizaLogger.log("Important content found in memory.");
-      return true;
+    if (important) {
+      elizaLogger.log("[knowledge handler] Important content found in memory.");
     } else {
-      elizaLogger.log("No important content found in memory.");
-      return false;
+      elizaLogger.log(
+        "[knowledge handler] No important content found in memory."
+      );
     }
+    return important;
   },
   name: "knowledgeEvaluator",
   validate: async (

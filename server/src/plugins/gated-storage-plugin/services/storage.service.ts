@@ -133,6 +133,7 @@ export class StorageService {
       throw new Error("Client is not initialized");
     }
 
+    console.log("[storage.service] attempting to encrypt data");
     try {
       // data will be JSON.stringify({ ciphertext, dataToEncryptHash })
       const { data } = await this.client.post(

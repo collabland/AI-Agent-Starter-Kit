@@ -17,7 +17,7 @@ export const gateDataProvider: Provider = {
         error:
           error instanceof Error
             ? error.message
-            : "Failed to fetch weather data",
+            : "Unable to get storage provider",
       };
     }
   },
