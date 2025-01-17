@@ -60,24 +60,24 @@ async function loginTwitter() {
 
 async function main() {
   // Once new .env is saved, check if twitter-cookies.json exists, else create it
-  const twitterCookiesPath = path.join(
-    __dirname,
-    "..",
-    "..",
-    "twitter-cookies.json"
-  );
-  if (!fs.existsSync(twitterCookiesPath)) {
-    console.log(
-      "[INFO] twitter-cookies.json does not exist, creating a new one..."
-    );
-    const cookies = await loginTwitter();
-    // store the cookies in twitter-cookies.json in the cookies property
-    fs.writeFileSync(
-      twitterCookiesPath,
-      JSON.stringify({ cookies: cookies.map((cookie) => cookie.toString()) })
-    );
-    console.log("Twitter cookies saved to:", twitterCookiesPath);
-  }
+  // const twitterCookiesPath = path.join(
+  //   __dirname,
+  //   "..",
+  //   "..",
+  //   "twitter-cookies.json"
+  // );
+  // if (!fs.existsSync(twitterCookiesPath)) {
+  //   console.log(
+  //     "[INFO] twitter-cookies.json does not exist, creating a new one..."
+  //   );
+  //   const cookies = await loginTwitter();
+  //   // store the cookies in twitter-cookies.json in the cookies property
+  //   fs.writeFileSync(
+  //     twitterCookiesPath,
+  //     JSON.stringify({ cookies: cookies.map((cookie) => cookie.toString()) })
+  //   );
+  //   console.log("Twitter cookies saved to:", twitterCookiesPath);
+  // }
 }
 
 main().catch((e) => {
