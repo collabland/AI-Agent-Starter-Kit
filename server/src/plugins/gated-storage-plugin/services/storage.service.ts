@@ -54,6 +54,8 @@ export class StorageService {
               "..",
               "..",
               "..",
+              "..",
+              "..",
               "lit-actions",
               "actions",
               `ipfs.json`
