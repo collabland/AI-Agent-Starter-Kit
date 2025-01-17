@@ -27,8 +27,10 @@ const main = async () => {
     const duration = endTime - startTime;
     console.log("🕒 Duration:", duration / 1000, "seconds");
     console.log("🔗 IPFS CID:", result.IpfsHash);
-    results[file] = {
+    const name = file.replace(/.js$/, ""); // invoke actions as name only, without name.js
+    results[name] = {
       ...result,
+      file,
       Duration: duration / 1000,
     };
   }
