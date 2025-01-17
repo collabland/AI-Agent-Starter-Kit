@@ -1,4 +1,10 @@
-import { Action, IAgentRuntime, Memory, State } from "@ai16z/eliza";
+import {
+  Action,
+  elizaLogger,
+  IAgentRuntime,
+  Memory,
+  State,
+} from "@ai16z/eliza";
 import { GateActionContent } from "../types.js";
 import { gateDataProvider } from "../providers/provider.js";
 import { AnyType } from "@/utils.js";
@@ -64,9 +70,8 @@ export const gateDataAction: Action = {
 
   handler: async (runtime: IAgentRuntime, message: Memory, state?: State) => {
     try {
-      console.log("Handling GATE_DATA action...");
-      const { roomId, content, embedding } = message;
-      console.log("roomId", roomId);
+      elizaLogger.log("[gateDataAction] Gating data now...");
+      const { content, embedding } = message;
 
       const provider = await gateDataProvider.get(runtime, message, state);
       if (provider.success) {
@@ -74,7 +79,9 @@ export const gateDataAction: Action = {
           content.text,
           embedding
         );
-        console.log("Stored message with embedding:", doc1);
+        elizaLogger.log(
+          ` [gateDataAction] Stored message with embedding: ${doc1}`
+        );
         return;
       }
 

@@ -1,10 +1,4 @@
-import {
-  Action,
-  HandlerCallback,
-  IAgentRuntime,
-  Memory,
-  State,
-} from "@ai16z/eliza";
+import { Action, IAgentRuntime, Memory, State } from "@ai16z/eliza";
 import { GateActionContent } from "../types.js";
 import { gateDataProvider } from "../providers/provider.js";
 
@@ -60,14 +54,13 @@ export const unlockDataAction: Action = {
 
   handler: async (runtime: IAgentRuntime, message: Memory, state?: State) => {
     try {
-      //   const provider = await gateDataProvider.get(runtime, message, state);
-      //   const context = await provider.storageProvider.getEmbeddingContext(
-      //     message.embedding
-      //   );
-      //   return context;
-      console.log("Unlocking data test...");
+      const provider = await gateDataProvider.get(runtime, message, state);
+      const context = await provider.storageProvider.getEmbeddingContext(
+        message.embedding
+      );
+      return context;
     } catch (error) {
-      console.error("Error in GATE_DATA action", error);
+      console.error("Error in UNLOCK_DATA action", error);
       return error;
     }
   },
