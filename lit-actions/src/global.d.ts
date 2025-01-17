@@ -278,7 +278,7 @@ declare global {
         dataToEncryptHash,
         authSig,
         chain,
-      }: string): string;
+      }: string): Promise<string>;
       /**
    * Decrypt to a single node.
    * @param {object[]} accessControlConditions The access control conditions
@@ -395,4 +395,17 @@ declare global {
   const publicKey: string;
   const toSign: Uint8Array;
   const sigName: string;
+
+  const encryptRequest: {
+    /// See `MultipleAccessControlConditions` in the `LitJsSdk` for examples
+    accessControlConditions: object[];
+    toEncrypt: Uint8Array;
+  };
+  const decryptRequest: {
+    /// See `MultipleAccessControlConditions` in the `LitJsSdk` for examples
+    accessControlConditions: object[];
+    ciphertext: String;
+    dataToEncryptHash: string;
+    chain: string;
+  };
 }
