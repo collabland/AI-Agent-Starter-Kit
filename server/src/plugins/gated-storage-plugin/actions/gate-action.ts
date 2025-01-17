@@ -6,8 +6,7 @@ import {
   State,
 } from "@ai16z/eliza";
 import { GateActionContent } from "../types.js";
-import { gateDataProvider } from "../providers/provider.js";
-import { knowledgeEvaluator } from "../evaluators/knowledge.js";
+import { StorageService } from "../services/storage.service.js";
 
 export const gateDataAction: Action = {
   name: "GATE_DATA",
@@ -96,21 +95,6 @@ export const gateDataAction: Action = {
     _state?: State
   ): Promise<boolean> => {
     return true;
-    // try {
-    //   const evaluator = await knowledgeEvaluator.handler(
-    //     runtime,
-    //     message,
-    //     _state
-    //   );
-    //   console.log("[gate-action] validate result ", evaluator);
-    //   // return true;
-    //   if (typeof evaluator === "boolean") {
-    //     return evaluator;
-    //   }
-    //   return false;
-    // } catch {
-    //   return false;
-    // }
   },
 
   handler: async (runtime: IAgentRuntime, message: Memory, state?: State) => {
@@ -118,9 +102,10 @@ export const gateDataAction: Action = {
       elizaLogger.log("[gateDataAction] Gating data now...");
       const { content, embedding } = message;
 
-      const provider = await gateDataProvider.get(runtime, message, state);
-      if (provider.success) {
-        const doc1 = await provider.storageProvider.storeMessageWithEmbedding(
+      const storageService = StorageService.getInstance();
+      await storageService.start();
+      if (embedding) {
+        const doc1 = await storageService.storeMessageWithEmbedding(
           content.text,
           embedding,
           true // TODO how can we tell if it's agent or user?
@@ -132,8 +117,8 @@ export const gateDataAction: Action = {
         return;
       }
       elizaLogger.error(
-        "[gateDataAction] failed to get provider ",
-        provider?.error
+        "[gateDataAction] no embedding included in the message",
+        message
       );
     } catch (error) {
       elizaLogger.error(

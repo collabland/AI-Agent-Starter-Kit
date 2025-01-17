@@ -133,7 +133,10 @@ export class StorageService {
     }
   }
 
-  public async getEmbeddingContext(array: number[]): Promise<string | null> {
+  public async getEmbeddingContext(
+    array: number[],
+    address: string
+  ): Promise<string | null> {
     if (!this.orbis) {
       throw new Error("Orbis is not initialized");
     }
@@ -163,6 +166,7 @@ export class StorageService {
           if (!this.client) {
             throw new Error("Client is not initialized");
           }
+
           const { cipherText, dataToEncryptHash } = JSON.parse(row.content);
           const { data } = await this.client.post(
             `/telegrambot/executeLitActionUsingPKP?chainId=${chainId}`,

@@ -8,14 +8,7 @@ import {
   ModelClass,
   generateText,
 } from "@ai16z/eliza";
-
-export const formatFacts = (facts: Memory[]) => {
-  const messageStrings = facts
-    .reverse()
-    .map((fact: Memory) => fact.content.text);
-  const finalMessageStrings = messageStrings.join("\n");
-  return finalMessageStrings;
-};
+import { gateDataProvider } from "../providers/provider.js";
 
 export const knowledgeEvaluator: Evaluator = {
   description: "Knowledge evaluator for checking important content in memory",
@@ -63,9 +56,20 @@ export const knowledgeEvaluator: Evaluator = {
     const important = res === "TRUE" ? true : false;
     // Example evaluation logic
     if (important) {
-      elizaLogger.debug(
-        "[knowledge handler] Important content found in memory."
-      );
+      const { content, embedding } = memory;
+
+      const provider = await gateDataProvider.get(runtime, memory, state);
+      if (provider.success) {
+        const doc1 = await provider.storageProvider.storeMessageWithEmbedding(
+          content.text,
+          embedding,
+          true // TODO how can we tell if it's agent or user?
+        );
+
+        elizaLogger.log(
+          `[knowledge handler] Important content found in memory. Stored message with embedding: ${doc1}`
+        );
+      }
     } else {
       elizaLogger.debug(
         "[knowledge handler] No important content found in memory."

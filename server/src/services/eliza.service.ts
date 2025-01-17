@@ -507,11 +507,6 @@ export class MessageManager {
         // Update state after response
         state = await this.runtime.updateRecentMessageState(state);
 
-        // Handle any resulting actions
-        elizaLogger.info("[eliza.service] evaluating");
-        const data = await this.runtime.evaluate(memory, state, shouldRespond);
-        elizaLogger.info("[eliza.service] evaluated", data);
-
         elizaLogger.info("[eliza.service] processing resulting actions");
         await this.runtime.processActions(
           memory,

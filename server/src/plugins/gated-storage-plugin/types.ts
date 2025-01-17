@@ -17,7 +17,7 @@ export interface GateActionContent extends Content {
 
 export interface GateDataProviderResponseGet {
   success: boolean;
-  storageProvider?: StorageService;
+  additionalContext?: string;
   error?: string;
 }
 
