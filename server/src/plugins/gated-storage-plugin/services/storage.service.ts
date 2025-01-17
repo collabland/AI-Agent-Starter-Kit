@@ -31,10 +31,6 @@ export class StorageService {
   }
 
   public async start(): Promise<void> {
-    if (!process.env.ETHEREUM_PRIVATE_KEY) {
-      throw new Error("ETHEREUM_PRIVATE_KEY is required");
-    }
-
     try {
       this.orbis = Orbis.getInstance();
       this.client = axios.create({
