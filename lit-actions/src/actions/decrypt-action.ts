@@ -17,6 +17,7 @@ const go = async () => {
     Lit.Actions.setResponse({
       response: JSON.stringify({
         message: "Successfully decrypted data",
+        decrypted,
         timestamp: Date.now().toString(),
       }),
     });

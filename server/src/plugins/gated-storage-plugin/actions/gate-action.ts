@@ -19,6 +19,34 @@ export const gateDataAction: Action = {
       {
         user: "{{user1}}",
         content: {
+          text: "Please protect the data from our conversation",
+        } as GateActionContent,
+      },
+      {
+        user: "{{agentName}}",
+        content: {
+          text: "Gating data now...",
+          action: "GATE_DATA",
+        },
+      },
+    ],
+    [
+      {
+        user: "{{user1}}",
+        content: {
+          text: "Please encrypt the data from our conversation",
+        } as GateActionContent,
+      },
+      {
+        user: "{{agentName}}",
+        content: {
+          text: "Gating data now...",
+          action: "GATE_DATA",
+        },
+      },
+      {
+        user: "{{user1}}",
+        content: {
           text: "The mantis shrimp's eyes have 16 types of photoreceptor cells, allowing them to see ultraviolet and polarized light, far beyond human capabilities.",
         } as GateActionContent,
       },
@@ -67,21 +95,22 @@ export const gateDataAction: Action = {
     message: Memory,
     _state?: State
   ): Promise<boolean> => {
-    try {
-      const evaluator = await knowledgeEvaluator.handler(
-        runtime,
-        message,
-        _state
-      );
-      console.log("[gate-action] validate result ", evaluator);
-      // return true;
-      if (typeof evaluator === "boolean") {
-        return evaluator;
-      }
-      return false;
-    } catch {
-      return false;
-    }
+    return true;
+    // try {
+    //   const evaluator = await knowledgeEvaluator.handler(
+    //     runtime,
+    //     message,
+    //     _state
+    //   );
+    //   console.log("[gate-action] validate result ", evaluator);
+    //   // return true;
+    //   if (typeof evaluator === "boolean") {
+    //     return evaluator;
+    //   }
+    //   return false;
+    // } catch {
+    //   return false;
+    // }
   },
 
   handler: async (runtime: IAgentRuntime, message: Memory, state?: State) => {
@@ -100,11 +129,12 @@ export const gateDataAction: Action = {
         );
         return;
       }
-
-      return new Error(provider.error);
+      elizaLogger.error(
+        "[gateDataAction] failed to get provider ",
+        provider?.error
+      );
     } catch (error) {
-      console.error("Error in GATE_DATA action", error);
-      return error;
+      elizaLogger.error("Error in GATE_DATA action", error);
     }
   },
 };

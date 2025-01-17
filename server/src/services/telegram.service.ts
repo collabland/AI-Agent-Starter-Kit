@@ -292,8 +292,9 @@ You can view the token page below (it takes a few minutes to be visible)`,
               actionJsParams: jsParams,
             }
           );
-          console.log("Action executed on Lit Nodes 🔥");
-          console.log("Action:", actionHash.IpfsHash);
+          console.log(
+            `Action with hash ${actionHash.IpfsHash} executed on Lit Nodes 🔥`
+          );
           console.log("Result:", data);
           ctx.reply(
             `Action executed on Lit Nodes 🔥\n\n` +

@@ -58,25 +58,23 @@ export const knowledgeEvaluator: Evaluator = {
       context,
       modelClass: ModelClass.MEDIUM,
     });
-    elizaLogger.log("Response from the agent:", res);
+    elizaLogger.debug("[knowledge handler] Response from the agent:", res);
 
     const important = res === "TRUE" ? true : false;
     // Example evaluation logic
     if (important) {
-      elizaLogger.log("[knowledge handler] Important content found in memory.");
+      elizaLogger.debug(
+        "[knowledge handler] Important content found in memory."
+      );
     } else {
-      elizaLogger.log(
+      elizaLogger.debug(
         "[knowledge handler] No important content found in memory."
       );
     }
     return important;
   },
   name: "knowledgeEvaluator",
-  validate: async (
-    _runtime: IAgentRuntime,
-    _memory: Memory,
-    _state?: State
-  ) => {
+  validate: async (_runtime: IAgentRuntime, memory: Memory, _state?: State) => {
     // Validation logic for the evaluator
     return true;
   },

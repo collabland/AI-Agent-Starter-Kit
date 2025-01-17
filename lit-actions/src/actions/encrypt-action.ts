@@ -14,6 +14,7 @@ const go = async () => {
     Lit.Actions.setResponse({
       response: JSON.stringify({
         message: "Successfully encrypted data",
+        encrypted,
         timestamp: Date.now().toString(),
       }),
     });

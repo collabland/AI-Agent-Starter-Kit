@@ -68,59 +68,9 @@ export class StorageService {
     }
   }
 
-  public async storeMessage(
-    context: string,
-    is_user: boolean
-  ): Promise<CeramicDocument> {
-    if (!this.orbis) {
-      throw new Error("Orbis is not initialized");
-    }
-    if (!this.encryptActionHash) {
-      throw new Error("Encrypt action hash is not initialized");
-    }
-    if (!this.client) {
-      throw new Error("Client is not initialized");
-    }
-    try {
-      // data will be JSON.stringify({ ciphertext, dataToEncryptHash })
-      const { data } = await this.client.post(
-        `/telegrambot/executeLitActionUsingPKP?chainId=${chainId}`,
-        {
-          actionIpfs: this.encryptActionHash,
-          actionJsParams: {
-            encryptRequest: {
-              accessControlConditions: [
-                {
-                  contractAddress: "",
-                  standardContractType: "",
-                  chain: "ethereum",
-                  method: "eth_getBalance",
-                  parameters: [":userAddress", "latest"],
-                  returnValueTest: {
-                    comparator: ">=",
-                    value: "1000000000000", // 0.000001 ETH
-                  },
-                },
-              ],
-              toEncrypt: toUtf8Bytes(context),
-            },
-          },
-        }
-      );
-      const content = {
-        content: data,
-        is_user,
-      };
-      return await this.orbis.updateOrbis(content as ServerMessage);
-    } catch (error) {
-      console.error("Error storing message:", error);
-      throw error;
-    }
-  }
-
   public async storeMessageWithEmbedding(
     context: string,
-    embeddings: number[],
+    embedding: number[],
     is_user: boolean
   ): Promise<CeramicDocument> {
     if (!this.orbis) {
@@ -160,13 +110,22 @@ export class StorageService {
           },
         }
       );
-      const content = {
-        content: data as string,
-        embedding: embeddings,
-        is_user,
-      };
-      const doc = await this.orbis.updateOrbis(content as ServerMessage);
-      return doc;
+      if (data?.response?.response) {
+        const res = JSON.parse(data.response.response);
+        // res.encrypted: {ciphertext: string, dataToEncryptHash: string}
+        const content = {
+          content: JSON.stringify(res.encrypted),
+          embedding,
+          is_user,
+        };
+        const doc = await this.orbis.updateOrbis(content as ServerMessage);
+        return doc;
+      } else {
+        console.log(
+          "[storage.service] did not get any response from lit action to persist"
+        );
+        throw new Error("Failed to encrypt data");
+      }
     } catch (error) {
       console.error("Error storing message:", error);
       throw error;
