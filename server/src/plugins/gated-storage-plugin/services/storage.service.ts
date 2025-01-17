@@ -138,7 +138,7 @@ export class StorageService {
       const { data } = await this.client.post(
         `/telegrambot/executeLitActionUsingPKP?chainId=${chainId}`,
         {
-          actionIpfs: this.decryptActionHash,
+          actionIpfs: this.encryptActionHash,
           actionJsParams: {
             encryptRequest: {
               accessControlConditions: [

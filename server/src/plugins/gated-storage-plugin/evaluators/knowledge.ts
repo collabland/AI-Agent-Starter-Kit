@@ -57,7 +57,7 @@ export const knowledgeEvaluator: Evaluator = {
     const res = await generateText({
       runtime,
       context,
-      modelClass: ModelClass.LARGE,
+      modelClass: ModelClass.MEDIUM,
     });
     elizaLogger.log("Response from the agent:", res);
 
