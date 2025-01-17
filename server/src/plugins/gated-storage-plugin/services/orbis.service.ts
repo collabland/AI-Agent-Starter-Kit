@@ -1,6 +1,6 @@
 import { OrbisDB, OrbisConnectResult, CeramicDocument } from "@useorbis/db-sdk";
 import { OrbisKeyDidAuth } from "@useorbis/db-sdk/auth";
-import { Memory, Content } from "@ai16z/eliza";
+import { Memory, Content, elizaLogger } from "@ai16z/eliza";
 
 export type ServerMessage = {
   content: string;
@@ -79,13 +79,25 @@ export class Orbis {
         "ORBIS_CONTEXT_ID is not defined in the environment variables."
       );
     }
-    await this.getAuthenticatedInstance();
+    try {
+      await this.getAuthenticatedInstance();
 
-    return await this.db
-      .insert(process.env.ORBIS_TABLE_ID)
-      .value(content)
-      .context(process.env.ORBIS_CONTEXT_ID)
-      .run();
+      const res = await this.db
+        .insert(process.env.ORBIS_TABLE_ID)
+        .value(content)
+        .context(process.env.ORBIS_CONTEXT_ID)
+        .run();
+      return res;
+    } catch (err) {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const replacer = (key: any, value: any) =>
+        key === "embedding" ? "[maskedEmbedding]" : value;
+      elizaLogger.warn(
+        "[orbis.service] failed to store data ",
+        JSON.stringify(content, replacer, 2)
+      );
+      throw err;
+    }
   }
 
   public async createVerifiedEntry(

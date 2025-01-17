@@ -5,6 +5,7 @@ import fs from "fs";
 import { getCollablandApiUrl } from "../../../utils.js";
 import path, { resolve } from "path";
 import { toUtf8Bytes } from "ethers";
+import { elizaLogger } from "@ai16z/eliza";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 const chainId = 8453;
@@ -189,12 +190,21 @@ export class StorageService {
               },
             }
           );
+          if (data?.response?.response) {
+            const res = JSON.parse(data.response.response);
+            return res.decrypted;
+          } else {
+            elizaLogger.warn(
+              "[storage.service] failed to retrieve decrypted data for row"
+            );
+            return null;
+          }
         })
       );
-      const concatenatedContext = decryptedRows.join(" ");
+      const concatenatedContext = decryptedRows?.join(" ");
       return concatenatedContext;
     } catch (error) {
-      console.error("Error getting context:", error);
+      console.error("Error getting embedded context:", error);
       throw error;
     }
   }

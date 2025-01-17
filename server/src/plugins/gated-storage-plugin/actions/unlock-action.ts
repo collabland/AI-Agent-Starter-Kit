@@ -1,4 +1,10 @@
-import { Action, IAgentRuntime, Memory, State } from "@ai16z/eliza";
+import {
+  Action,
+  elizaLogger,
+  IAgentRuntime,
+  Memory,
+  State,
+} from "@ai16z/eliza";
 import { GateActionContent } from "../types.js";
 import { gateDataProvider } from "../providers/provider.js";
 
@@ -55,9 +61,11 @@ export const unlockDataAction: Action = {
   handler: async (runtime: IAgentRuntime, message: Memory, state?: State) => {
     try {
       const provider = await gateDataProvider.get(runtime, message, state);
+      elizaLogger.debug("[UNLOCK_ACTION] getting embedded context");
       const context = await provider.storageProvider.getEmbeddingContext(
         message.embedding
       );
+      elizaLogger.debug("[UNLOCK_ACTION] retrieved context");
       return context;
     } catch (error) {
       console.error("Error in UNLOCK_DATA action", error);

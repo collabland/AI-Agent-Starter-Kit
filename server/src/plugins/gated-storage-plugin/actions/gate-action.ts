@@ -122,8 +122,10 @@ export const gateDataAction: Action = {
       if (provider.success) {
         const doc1 = await provider.storageProvider.storeMessageWithEmbedding(
           content.text,
-          embedding
+          embedding,
+          true // TODO how can we tell if it's agent or user?
         );
+
         elizaLogger.log(
           ` [gateDataAction] Stored message with embedding: ${doc1}`
         );
@@ -134,7 +136,10 @@ export const gateDataAction: Action = {
         provider?.error
       );
     } catch (error) {
-      elizaLogger.error("Error in GATE_DATA action", error);
+      elizaLogger.error(
+        "Error in GATE_DATA action",
+        JSON.stringify(error, null, 2)
+      );
     }
   },
 };
