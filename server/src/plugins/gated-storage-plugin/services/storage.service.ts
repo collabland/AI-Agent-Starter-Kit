@@ -1,10 +1,10 @@
 import { CeramicDocument } from "@useorbis/db-sdk";
 import { Orbis, type ServerMessage } from "./orbis.service.js";
 import axios, { AxiosInstance } from "axios";
-import { AnyType } from "../../../utils.js";
 import fs from "fs";
 import { getCollablandApiUrl } from "../../../utils.js";
 import path, { resolve } from "path";
+import { toUtf8Bytes } from "ethers";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 const chainId = 8453;
@@ -63,10 +63,10 @@ export class StorageService {
           )
         ).toString()
       );
-      this.encryptActionHash = actionHashes["encrypt-action.js"].IpfsHash;
-      this.decryptActionHash = actionHashes["decrypt-action.js"].IpfsHash;
+      this.encryptActionHash = actionHashes["encrypt-action"].IpfsHash;
+      this.decryptActionHash = actionHashes["decrypt-action"].IpfsHash;
       return;
-    } catch (error: AnyType) {
+    } catch (error) {
       console.error("Error starting StorageService:", error);
       throw error;
     }
@@ -91,7 +91,24 @@ export class StorageService {
         `/telegrambot/executeLitActionUsingPKP?chainId=${chainId}`,
         {
           actionIpfs: this.encryptActionHash,
-          actionJsParams: context,
+          actionJsParams: {
+            encryptRequest: {
+              accessControlConditions: [
+                {
+                  contractAddress: "",
+                  standardContractType: "",
+                  chain: "ethereum",
+                  method: "eth_getBalance",
+                  parameters: [":userAddress", "latest"],
+                  returnValueTest: {
+                    comparator: ">=",
+                    value: "1000000000000", // 0.000001 ETH
+                  },
+                },
+              ],
+              toEncrypt: toUtf8Bytes(context),
+            },
+          },
         }
       );
       const content = {
@@ -99,7 +116,7 @@ export class StorageService {
         is_user,
       };
       return await this.orbis.updateOrbis(content as ServerMessage);
-    } catch (error: AnyType) {
+    } catch (error) {
       console.error("Error storing message:", error);
       throw error;
     }
@@ -126,17 +143,34 @@ export class StorageService {
         `/telegrambot/executeLitActionUsingPKP?chainId=${chainId}`,
         {
           actionIpfs: this.decryptActionHash,
-          actionJsParams: context,
+          actionJsParams: {
+            encryptRequest: {
+              accessControlConditions: [
+                {
+                  contractAddress: "",
+                  standardContractType: "",
+                  chain: "ethereum",
+                  method: "eth_getBalance",
+                  parameters: [":userAddress", "latest"],
+                  returnValueTest: {
+                    comparator: ">=",
+                    value: "1000000000000", // 0.000001 ETH
+                  },
+                },
+              ],
+              toEncrypt: toUtf8Bytes(context),
+            },
+          },
         }
       );
       const content = {
-        content: data,
+        content: data as string,
         embedding: embeddings,
         is_user,
       };
       const doc = await this.orbis.updateOrbis(content as ServerMessage);
       return doc;
-    } catch (error: AnyType) {
+    } catch (error) {
       console.error("Error storing message:", error);
       throw error;
     }
@@ -146,15 +180,17 @@ export class StorageService {
     if (!this.orbis) {
       throw new Error("Orbis is not initialized");
     }
-    if (!process.env.TABLE_ID) {
-      throw new Error("TABLE_ID is not defined in the environment variables.");
+    if (!process.env.ORBIS_TABLE_ID) {
+      throw new Error(
+        "ORBIS_TABLE_ID is not defined in the environment variables."
+      );
     }
 
     try {
       const formattedEmbedding = `ARRAY[${array.join(", ")}]::vector`;
       const query = `
             SELECT content, is_user, embedding <=> ${formattedEmbedding} AS similarity
-            FROM ${process.env.TABLE_ID}
+            FROM ${process.env.ORBIS_TABLE_ID}
             ORDER BY similarity ASC
             LIMIT 5;
             `;
@@ -170,18 +206,38 @@ export class StorageService {
           if (!this.client) {
             throw new Error("Client is not initialized");
           }
+          const { cipherText, dataToEncryptHash } = JSON.parse(row.content);
           const { data } = await this.client.post(
             `/telegrambot/executeLitActionUsingPKP?chainId=${chainId}`,
             {
               actionIpfs: this.decryptActionHash,
-              actionJsParams: row.content,
+              actionJsParams: {
+                decryptRequest: {
+                  accessControlConditions: [
+                    {
+                      contractAddress: "",
+                      standardContractType: "",
+                      chain: "ethereum",
+                      method: "eth_getBalance",
+                      parameters: [":userAddress", "latest"],
+                      returnValueTest: {
+                        comparator: ">=",
+                        value: "1000000000000", // 0.000001 ETH
+                      },
+                    },
+                  ],
+                  cipherText,
+                  dataToEncryptHash,
+                  chain: "ethereum",
+                },
+              },
             }
           );
         })
       );
       const concatenatedContext = decryptedRows.join(" ");
       return concatenatedContext;
-    } catch (error: AnyType) {
+    } catch (error) {
       console.error("Error getting context:", error);
       throw error;
     }

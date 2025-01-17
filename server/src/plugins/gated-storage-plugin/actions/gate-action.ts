@@ -7,7 +7,6 @@ import {
 } from "@ai16z/eliza";
 import { GateActionContent } from "../types.js";
 import { gateDataProvider } from "../providers/provider.js";
-import { AnyType } from "@/utils.js";
 import { knowledgeEvaluator } from "../evaluators/knowledge.js";
 
 export const gateDataAction: Action = {

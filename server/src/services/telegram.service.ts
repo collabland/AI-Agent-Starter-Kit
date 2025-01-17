@@ -210,18 +210,67 @@ You can view the token page below (it takes a few minutes to be visible)`,
             ctx.reply("Action not found");
             return;
           }
-          // ! NOTE: The message to sign can be any normal message, or raw TX
-          // ! In order to sign EIP-191 message, you need to encode it properly, Lit protocol does raw signatures
-          const messageToSign =
-            ctx.from?.username ?? ctx.from?.first_name ?? "";
-          const messageToSignDigest = keccak256(toUtf8Bytes(messageToSign));
-          // ! NOTE: You can send any jsParams you want here, it depends on your Lit action code
-          const jsParams = {
-            helloName: messageToSign,
-            toSign: Array.from(getBytes(messageToSignDigest)),
-          };
+          let jsParams;
           // ! NOTE: You can change the chainId to any chain you want to execute the action on
           const chainId = 8453;
+          switch (action) {
+            case "hello-action": {
+              // ! NOTE: The message to sign can be any normal message, or raw TX
+              // ! In order to sign EIP-191 message, you need to encode it properly, Lit protocol does raw signatures
+              const messageToSign =
+                ctx.from?.username ?? ctx.from?.first_name ?? "";
+              const messageToSignDigest = keccak256(toUtf8Bytes(messageToSign));
+              jsParams = {
+                helloName: messageToSign,
+                toSign: Array.from(getBytes(messageToSignDigest)),
+              };
+              break;
+            }
+            case "decrypt-action": {
+              // TODO: how do i get real text from the msg
+              const message =
+                ctx.from?.username ?? ctx.from?.first_name ?? "test data";
+              jsParams = {
+                decryptRequest: {
+                  accessControlConditions: [{}],
+                  cipherText: "this is fake",
+                  dataToEncryptHash: `not going to work: ${message}`,
+                  chain: chainId.toString(),
+                },
+              };
+              break;
+            }
+            case "encrypt-action": {
+              // TODO: how do i get real text from the msg since it is literally just the action name. for testing this works
+              const message =
+                ctx.from?.username ?? ctx.from?.first_name ?? "test data";
+              // ! NOTE: You can send any jsParams you want here, it depends on your Lit action code
+              jsParams = {
+                encryptRequest: {
+                  accessControlConditions: [
+                    {
+                      contractAddress: "",
+                      standardContractType: "",
+                      chain: "ethereum",
+                      method: "eth_getBalance",
+                      parameters: [":userAddress", "latest"],
+                      returnValueTest: {
+                        comparator: ">=",
+                        value: "1000000000000", // 0.000001 ETH
+                      },
+                    },
+                  ],
+                  toEncrypt: toUtf8Bytes(message),
+                },
+              };
+              break;
+            }
+            default: {
+              // they typed something random or a dev forgot to update this list
+              ctx.reply(`Action not handled: ${action}`);
+              return;
+            }
+          }
           await ctx.reply(
             "Executing action..." +
               `\n\nAction Hash: <code>${actionHash.IpfsHash}</code>\n\nParams:\n<pre lang="json"><code>${JSON.stringify(
@@ -232,6 +281,9 @@ You can view the token page below (it takes a few minutes to be visible)`,
             {
               parse_mode: "HTML",
             }
+          );
+          console.log(
+            `[telegram.service] executing lit action with hash ${actionHash.IpfsHash} on chain ${chainId}`
           );
           const { data } = await client.post(
             `/telegrambot/executeLitActionUsingPKP?chainId=${chainId}`,

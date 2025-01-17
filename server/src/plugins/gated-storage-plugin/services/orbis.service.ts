@@ -1,11 +1,11 @@
 import { OrbisDB, OrbisConnectResult, CeramicDocument } from "@useorbis/db-sdk";
 import { OrbisKeyDidAuth } from "@useorbis/db-sdk/auth";
 import { Memory, Content } from "@ai16z/eliza";
-import { AnyType } from "@/utils.js";
 
-export type ServerMessage = Memory & {
-  content: Content | string;
+export type ServerMessage = {
+  content: string;
   createdAt: string;
+  embedding: number[];
   is_user: boolean;
 };
 
@@ -69,20 +69,22 @@ export class Orbis {
   }
 
   public async updateOrbis(content: ServerMessage): Promise<CeramicDocument> {
-    if (!process.env.TABLE_ID) {
-      throw new Error("TABLE_ID is not defined in the environment variables.");
-    }
-    if (!process.env.CONTEXT_ID) {
+    if (!process.env.ORBIS_TABLE_ID) {
       throw new Error(
-        "CONTEXT_ID is not defined in the environment variables."
+        "ORBIS_TABLE_ID is not defined in the environment variables."
+      );
+    }
+    if (!process.env.ORBIS_CONTEXT_ID) {
+      throw new Error(
+        "ORBIS_CONTEXT_ID is not defined in the environment variables."
       );
     }
     await this.getAuthenticatedInstance();
 
     return await this.db
-      .insert(process.env.TABLE_ID)
+      .insert(process.env.ORBIS_TABLE_ID)
       .value(content)
-      .context(process.env.CONTEXT_ID)
+      .context(process.env.ORBIS_CONTEXT_ID)
       .run();
   }
 
@@ -92,9 +94,9 @@ export class Orbis {
     if (!process.env.VERIFIED_TABLE) {
       throw new Error("Missing verified table");
     }
-    if (!process.env.CONTEXT_ID) {
+    if (!process.env.ORBIS_CONTEXT_ID) {
       throw new Error(
-        "CONTEXT_ID is not defined in the environment variables."
+        "ORBIS_CONTEXT_ID is not defined in the environment variables."
       );
     }
     try {
@@ -102,9 +104,9 @@ export class Orbis {
       return await this.db
         .insert(process.env.VERIFIED_TABLE)
         .value(content)
-        .context(process.env.CONTEXT_ID)
+        .context(process.env.ORBIS_CONTEXT_ID)
         .run();
-    } catch (error: AnyType) {
+    } catch (error) {
       console.error("Error storing message:", error);
       throw error;
     }
