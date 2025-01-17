@@ -1,5 +1,4 @@
 import { BaseService } from "./base.service.js";
-import { StorageService } from "./storage.service.js";
 import {
   AgentRuntime,
   Character,
@@ -17,6 +16,7 @@ import Database from "better-sqlite3";
 import path from "path";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
+import { gateDataPlugin } from "../plugins/gated-storage-plugin/index.js";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -162,12 +162,10 @@ export class MessageManager {
   public bot: Bot<Context>;
   private runtime: IAgentRuntime;
   private imageService: IImageDescriptionService;
-  private storageService: StorageService;
 
   constructor(bot: Bot<Context>, runtime: IAgentRuntime) {
     this.bot = bot;
     this.runtime = runtime;
-    this.storageService = StorageService.getInstance();
   }
 
   // Process image messages and generate descriptions
@@ -360,7 +358,6 @@ export class MessageManager {
     try {
       // Convert IDs to UUIDs
       const userId = stringToUuid(ctx.from.id.toString()) as UUID;
-      this.storageService.start();
       const userName =
         ctx.from.username || ctx.from.first_name || "Unknown User";
       const chatId = stringToUuid(
@@ -428,7 +425,6 @@ export class MessageManager {
       };
 
       await this.runtime.messageManager.createMemory(memory);
-      await this.storageService.storeMessage(memory, true);
       // Update state with the new memory
       let state = await this.runtime.composeState(memory);
       state = await this.runtime.updateRecentMessageState(state);
@@ -437,9 +433,6 @@ export class MessageManager {
 
       if (shouldRespond) {
         // Generate response
-        // const additionalContext =
-        const conversation = await this.storageService.getConversation();
-        console.log("[handleMessage] conversation", conversation);
         // todo: add additional context to the message
         const context = composeContext({
           state,
@@ -487,8 +480,6 @@ export class MessageManager {
               createdAt: sentMessage.date * 1000,
               embedding: getEmbeddingZeroVector(),
             };
-
-            await this.storageService.storeMessage(memory, false);
 
             // Set action to CONTINUE for all messages except the last one
             // For the last message, use the original action from the response content
@@ -589,7 +580,7 @@ export class ElizaService extends BaseService {
         modelProvider: character.modelProvider || ModelProviderName.GAIANET,
         character,
         conversationLength: 4096,
-        plugins: [bootstrapPlugin, collablandPlugin],
+        plugins: [bootstrapPlugin, collablandPlugin, gateDataPlugin],
         cacheManager: new CacheManager(new MemoryCacheAdapter()),
         logging: true,
       });

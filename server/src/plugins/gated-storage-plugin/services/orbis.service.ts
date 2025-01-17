@@ -1,6 +1,7 @@
 import { OrbisDB, OrbisConnectResult, CeramicDocument } from "@useorbis/db-sdk";
 import { OrbisKeyDidAuth } from "@useorbis/db-sdk/auth";
 import { Memory, Content } from "@ai16z/eliza";
+import { AnyType } from "@/utils.js";
 
 export type ServerMessage = Memory & {
   content: Content | string;
@@ -8,14 +9,17 @@ export type ServerMessage = Memory & {
   is_user: boolean;
 };
 
+export type VerifiedContent = {
+  address: string;
+  user_id: string;
+  verified: boolean;
+};
+
 export class Orbis {
   private static instance: Orbis;
   private db: OrbisDB;
 
   private constructor() {
-    if (!process.env.ENV_ID) {
-      throw new Error("ENV_ID is not defined in the environment variables.");
-    }
     if (!process.env.ORBIS_GATEWAY_URL) {
       throw new Error(
         "ORBIS_GATEWAY_URL is not defined in the environment variables."
@@ -33,7 +37,6 @@ export class Orbis {
       nodes: [
         {
           gateway: process.env.ORBIS_GATEWAY_URL,
-          env: process.env.ENV_ID,
         },
       ],
     });
@@ -83,7 +86,31 @@ export class Orbis {
       .run();
   }
 
-  public async query(text: string): Promise<{
+  public async createVerifiedEntry(
+    content: VerifiedContent
+  ): Promise<CeramicDocument> {
+    if (!process.env.VERIFIED_TABLE) {
+      throw new Error("Missing verified table");
+    }
+    if (!process.env.CONTEXT_ID) {
+      throw new Error(
+        "CONTEXT_ID is not defined in the environment variables."
+      );
+    }
+    try {
+      await this.getAuthenticatedInstance();
+      return await this.db
+        .insert(process.env.VERIFIED_TABLE)
+        .value(content)
+        .context(process.env.CONTEXT_ID)
+        .run();
+    } catch (error: AnyType) {
+      console.error("Error storing message:", error);
+      throw error;
+    }
+  }
+
+  public async queryKnowledgeIndex(text: string): Promise<{
     columns: Array<string>;
     rows: ServerMessage[];
   } | null> {
