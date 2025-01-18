@@ -43,34 +43,6 @@ export const gateDataAction: Action = {
           action: "GATE_DATA",
         },
       },
-      {
-        user: "{{user1}}",
-        content: {
-          text: "The mantis shrimp's eyes have 16 types of photoreceptor cells, allowing them to see ultraviolet and polarized light, far beyond human capabilities.",
-        } as GateActionContent,
-      },
-      {
-        user: "{{agentName}}",
-        content: {
-          text: "Gating data now...",
-          action: "GATE_DATA",
-        },
-      },
-    ],
-    [
-      {
-        user: "{{user1}}",
-        content: {
-          text: "Neutron stars are so dense that a sugar-cube-sized piece of one would weigh about a billion tons on Earth.",
-        } as GateActionContent,
-      },
-      {
-        user: "{{agentName}}",
-        content: {
-          text: "Gating data now...",
-          action: "GATE_DATA",
-        },
-      },
     ],
     [
       {
@@ -94,7 +66,7 @@ export const gateDataAction: Action = {
     message: Memory,
     _state?: State
   ): Promise<boolean> => {
-    return true;
+    return StorageService.isMemoryStorable(message);
   },
 
   handler: async (runtime: IAgentRuntime, message: Memory, state?: State) => {
@@ -111,8 +83,8 @@ export const gateDataAction: Action = {
           true // TODO how can we tell if it's agent or user?
         );
 
-        elizaLogger.log(
-          ` [gateDataAction] Stored message with embedding: ${doc1}`
+        elizaLogger.debug(
+          `[gateDataAction] Stored message with embedding with stream ID ${doc1.id}`
         );
         return;
       }

@@ -507,13 +507,17 @@ export class MessageManager {
         // Update state after response
         state = await this.runtime.updateRecentMessageState(state);
 
-        elizaLogger.info("[eliza.service] processing resulting actions");
+        elizaLogger.debug("[eliza.service] processing resulting actions");
         await this.runtime.processActions(
           memory,
           responseMessages,
           state,
           callback
         );
+
+        elizaLogger.debug("[eliza.service] evaluating");
+        const data = await this.runtime.evaluate(memory, state, shouldRespond);
+        elizaLogger.debug(`[eliza.service] evaluated ${data}`);
       }
     } catch (error) {
       console.error("❌ Error handling message:", error);

@@ -9,6 +9,8 @@ import {
   generateText,
 } from "@ai16z/eliza";
 import { gateDataProvider } from "../providers/provider.js";
+import { GateDataProviderResponseGet } from "../types.js";
+import { StorageService } from "../services/storage.service.js";
 
 export const knowledgeEvaluator: Evaluator = {
   description: "Knowledge evaluator for checking important content in memory",
@@ -34,52 +36,96 @@ export const knowledgeEvaluator: Evaluator = {
             text: "I can help you design this system - what are some code references for how Lit Actions are built?",
           },
         },
+        {
+          user: "{{user1}}",
+          content: {
+            text: "The mantis shrimp's eyes have 16 types of photoreceptor cells, allowing them to see ultraviolet and polarized light, far beyond human capabilities.",
+          },
+        },
+        {
+          user: "{{agentName}}",
+          content: {
+            text: "Gating data now...",
+            action: "GATE_DATA",
+          },
+        },
+        {
+          user: "{{user1}}",
+          content: {
+            text: "Neutron stars are so dense that a sugar-cube-sized piece of one would weigh about a billion tons on Earth.",
+          },
+        },
+        {
+          user: "{{agentName}}",
+          content: {
+            text: "Gating data now...",
+            action: "GATE_DATA",
+          },
+        },
       ] as ActionExample[],
       outcome: "TRUE",
     },
   ],
   handler: async (runtime: IAgentRuntime, memory: Memory, state?: State) => {
-    const context = `${knowledgeEvaluator.examples}
+    let context = `${knowledgeEvaluator.examples}
     Determine if the memory contains important content that reveals subject-matter expertise. Answer only with the following responses:
     - TRUE
     - FALSE
     The following is the memory content: ${memory.content.text}
     `;
+
+    try {
+      // get relevant context
+      const data: GateDataProviderResponseGet = await gateDataProvider.get(
+        runtime,
+        memory,
+        state
+      );
+      if (data.success) {
+        context = `Here is relevant context: ${data.additionalContext}\n${context}`;
+      }
+    } catch (err) {
+      elizaLogger.warn(
+        "[knowledge provider] failed to get additional data provider context ",
+        err
+      );
+    }
+
     // prompt the agent to determine if the memory contains important content
     const res = await generateText({
       runtime,
       context,
-      modelClass: ModelClass.MEDIUM,
+      modelClass: ModelClass.SMALL,
     });
     elizaLogger.debug("[knowledge handler] Response from the agent:", res);
 
     const important = res === "TRUE" ? true : false;
-    // Example evaluation logic
     if (important) {
+      elizaLogger.log(
+        `[knowledge handler] Important content found in memory. Storing message with embedding`
+      );
       const { content, embedding } = memory;
-
-      const provider = await gateDataProvider.get(runtime, memory, state);
-      if (provider.success) {
-        const doc1 = await provider.storageProvider.storeMessageWithEmbedding(
-          content.text,
-          embedding,
-          true // TODO how can we tell if it's agent or user?
-        );
-
-        elizaLogger.log(
-          `[knowledge handler] Important content found in memory. Stored message with embedding: ${doc1}`
-        );
-      }
+      const storageService = StorageService.getInstance();
+      await storageService.start();
+      // don't care about doc returned
+      const doc = await storageService.storeMessageWithEmbedding(
+        content.text,
+        embedding!, // not null since we only run when isMemoryStorable() is true
+        true // TODO how can we tell if it's agent or user?
+      );
+      elizaLogger.debug(
+        `[knowledge handler] Stored message with embedding with stream ID ${doc.id}`
+      );
     } else {
       elizaLogger.debug(
         "[knowledge handler] No important content found in memory."
       );
     }
-    return important;
+    return;
   },
   name: "knowledgeEvaluator",
   validate: async (_runtime: IAgentRuntime, memory: Memory, _state?: State) => {
-    // Validation logic for the evaluator
-    return true;
+    // only available if we're able to use remote storage and memory has proper embeddings
+    return StorageService.isMemoryStorable(memory);
   },
 };

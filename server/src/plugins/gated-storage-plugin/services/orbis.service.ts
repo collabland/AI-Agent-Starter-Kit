@@ -1,6 +1,7 @@
 import { OrbisDB, OrbisConnectResult, CeramicDocument } from "@useorbis/db-sdk";
 import { OrbisKeyDidAuth } from "@useorbis/db-sdk/auth";
 import { Memory, Content, elizaLogger } from "@ai16z/eliza";
+import { maskEmbedding } from "./storage.service.js";
 
 export type ServerMessage = {
   content: string;
@@ -89,12 +90,9 @@ export class Orbis {
         .run();
       return res;
     } catch (err) {
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      const replacer = (key: any, value: any) =>
-        key === "embedding" ? "[maskedEmbedding]" : value;
       elizaLogger.warn(
         "[orbis.service] failed to store data ",
-        JSON.stringify(content, replacer, 2)
+        JSON.stringify(content, maskEmbedding, 2)
       );
       throw err;
     }

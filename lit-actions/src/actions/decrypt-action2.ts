@@ -1,7 +1,16 @@
 // Add this to the top of the file, so that it can reference the global.d.ts file
 /// <reference path="../global.d.ts" />
 
-const encryptData = async (to_encrypt: Uint8Array) => {
+const go = async () => {
+  if (!ciphertext || !dataToEncryptHash || !chain) {
+    Lit.Actions.setResponse({
+      response: JSON.stringify({
+        message: `bad_request: missing input`,
+        timestamp: Date.now().toString(),
+      }),
+    });
+    return;
+  }
   // const accessControlConditions = [
   //   {
   //     contractAddress: "evmBasic",
@@ -16,6 +25,7 @@ const encryptData = async (to_encrypt: Uint8Array) => {
   //   },
   // ];
 
+  // always true since 1651276942 is 2025-01-18 08:42:54 UTC
   const encryptDecryptACL = [
     {
       contractAddress: "evmBasic",
@@ -29,40 +39,31 @@ const encryptData = async (to_encrypt: Uint8Array) => {
       },
     },
   ];
-  const res = await Lit.Actions.encrypt({
-    accessControlConditions: encryptDecryptACL,
-    to_encrypt,
-  });
-  return res;
-};
 
-const go = async () => {
-  if (!toEncrypt) {
-    Lit.Actions.setResponse({
-      response: JSON.stringify({
-        message: "bad_request: invalid input",
-        timestamp: Date.now().toString(),
-      }),
-    });
-    return;
-  }
   try {
-    // new buffer to avoid error about shared buffer view
-    const { ciphertext, dataToEncryptHash } = await encryptData(
-      new TextEncoder().encode(toEncrypt)
-    );
+    const decrypted = await Lit.Actions.decryptToSingleNode({
+      accessControlConditions: encryptDecryptACL,
+      ciphertext,
+      dataToEncryptHash,
+      authSig: null,
+      chain,
+    });
+    // do nothing on nodes without data
+    if (!decrypted) {
+      return;
+    }
     Lit.Actions.setResponse({
       response: JSON.stringify({
-        message: "Successfully encrypted data",
-        ciphertext,
-        dataToEncryptHash,
+        message: "Successfully decrypted data",
+        decrypted,
         timestamp: Date.now().toString(),
       }),
     });
-  } catch (err) {
+  } catch (error) {
     Lit.Actions.setResponse({
       response: JSON.stringify({
-        message: `Failed to encrypt data (${toEncrypt}): ${err.message}`,
+        message: `failed to decrypt data: ${error.message}`,
+        error,
         timestamp: Date.now().toString(),
       }),
     });

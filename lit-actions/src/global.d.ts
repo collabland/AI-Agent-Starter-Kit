@@ -396,16 +396,10 @@ declare global {
   const toSign: Uint8Array;
   const sigName: string;
 
-  const encryptRequest: {
-    /// See `MultipleAccessControlConditions` in the `LitJsSdk` for examples
-    accessControlConditions: object[];
-    toEncrypt: Uint8Array;
-  };
-  const decryptRequest: {
-    /// See `MultipleAccessControlConditions` in the `LitJsSdk` for examples
-    accessControlConditions: object[];
-    ciphertext: String;
-    dataToEncryptHash: string;
-    chain: string;
-  };
+  // encrypt-action
+  const toEncrypt: string;
+  // decrypt-action
+  const ciphertext: string;
+  const dataToEncryptHash: string;
+  const chain: string;
 }

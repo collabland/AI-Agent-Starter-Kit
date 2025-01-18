@@ -16,6 +16,19 @@ import { keccak256, getBytes, toUtf8Bytes } from "ethers";
 import { TwitterService } from "./twitter.service.js";
 import { NgrokService } from "./ngrok.service.js";
 
+// hack to avoid 400 errors sending params back to telegram. not even close to perfect
+const htmlEscape = (key: AnyType, val: AnyType) => {
+  if (typeof val === "string") {
+    return val
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;"); // single quote
+  }
+  return val;
+};
+
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 export class TelegramService extends BaseService {
   private static instance: TelegramService;
@@ -207,7 +220,7 @@ You can view the token page below (it takes a few minutes to be visible)`,
           const actionHash = actionHashes[action];
           console.log("actionHash:", actionHash);
           if (!actionHash) {
-            ctx.reply("Action not found");
+            ctx.reply(`Action not found: ${action}`);
             return;
           }
           let jsParams;
@@ -226,42 +239,36 @@ You can view the token page below (it takes a few minutes to be visible)`,
               };
               break;
             }
-            case "decrypt-action": {
-              // TODO: how do i get real text from the msg
-              const message =
-                ctx.from?.username ?? ctx.from?.first_name ?? "test data";
+            case "decrypt-action":
+            case "decrypt-action2": {
+              const toEncrypt = `encrypt-decrypt-test-${new Date().toUTCString()}`;
+              ctx.reply(`Invoking encrypt action with ${toEncrypt}`);
+              const { data } = await client.post(
+                `/telegrambot/executeLitActionUsingPKP?chainId=${chainId}`,
+                {
+                  actionIpfs: actionHashes["encrypt-action"].IpfsHash,
+                  actionJsParams: {
+                    toEncrypt,
+                  },
+                }
+              );
+              console.log("encrypt response ", data);
+              const { ciphertext, dataToEncryptHash } = JSON.parse(
+                data.response.response
+              );
               jsParams = {
-                decryptRequest: {
-                  accessControlConditions: [{}],
-                  cipherText: "this is fake",
-                  dataToEncryptHash: `not going to work: ${message}`,
-                  chain: chainId.toString(),
-                },
+                ciphertext,
+                dataToEncryptHash,
+                chain: "base",
               };
               break;
             }
             case "encrypt-action": {
-              // TODO: how do i get real text from the msg since it is literally just the action name. for testing this works
               const message =
                 ctx.from?.username ?? ctx.from?.first_name ?? "test data";
               // ! NOTE: You can send any jsParams you want here, it depends on your Lit action code
               jsParams = {
-                encryptRequest: {
-                  accessControlConditions: [
-                    {
-                      contractAddress: "",
-                      standardContractType: "",
-                      chain: "ethereum",
-                      method: "eth_getBalance",
-                      parameters: [":userAddress", "latest"],
-                      returnValueTest: {
-                        comparator: ">=",
-                        value: "1000000000000", // 0.000001 ETH
-                      },
-                    },
-                  ],
-                  toEncrypt: toUtf8Bytes(message),
-                },
+                toEncrypt: `${message}-${new Date().toUTCString()}`,
               };
               break;
             }
@@ -275,7 +282,7 @@ You can view the token page below (it takes a few minutes to be visible)`,
             "Executing action..." +
               `\n\nAction Hash: <code>${actionHash.IpfsHash}</code>\n\nParams:\n<pre lang="json"><code>${JSON.stringify(
                 jsParams,
-                null,
+                htmlEscape,
                 2
               )}</code></pre>`,
             {
