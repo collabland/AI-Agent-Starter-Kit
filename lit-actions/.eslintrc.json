@@ -11,7 +11,13 @@
     ],
     "@typescript-eslint/triple-slash-reference": "off"
   },
-  "ignorePatterns": ["dist/", "node_modules/", "actions/", "src/global.d.ts"],
+  "ignorePatterns": [
+    "dist/",
+    "node_modules/",
+    "/shims/",
+    "actions/",
+    "src/global.d.ts"
+  ],
   "env": {
     "node": true,
     "es6": true,

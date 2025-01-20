@@ -2,35 +2,10 @@
 /// <reference path="../global.d.ts" />
 
 const encryptData = async (to_encrypt: Uint8Array) => {
-  // const accessControlConditions = [
-  //   {
-  //     contractAddress: "evmBasic",
-  //     standardContractType: "",
-  //     chain: "base",
-  //     method: "eth_getBalance",
-  //     parameters: [":userAddress", "latest"],
-  //     returnValueTest: {
-  //       comparator: "<=",
-  //       value: "1000000000000000000", // 1 ETH
-  //     },
-  //   },
-  // ];
-
-  const encryptDecryptACL = [
-    {
-      contractAddress: "evmBasic",
-      standardContractType: "timestamp",
-      chain: "base",
-      method: "eth_getBlockByNumber",
-      parameters: ["latest"],
-      returnValueTest: {
-        comparator: ">=",
-        value: "1",
-      },
-    },
-  ];
+  const accessControlConditions =
+    await GatedData.getEncryptDecryptACL(publicKey);
   const res = await Lit.Actions.encrypt({
-    accessControlConditions: encryptDecryptACL,
+    accessControlConditions,
     to_encrypt,
   });
   return res;

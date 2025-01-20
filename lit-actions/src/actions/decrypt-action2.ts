@@ -11,38 +11,12 @@ const go = async () => {
     });
     return;
   }
-  // const accessControlConditions = [
-  //   {
-  //     contractAddress: "evmBasic",
-  //     standardContractType: "",
-  //     chain: "base",
-  //     method: "eth_getBalance",
-  //     parameters: [":userAddress", "latest"],
-  //     returnValueTest: {
-  //       comparator: "<=",
-  //       value: "1000000000000000000", // 1 ETH
-  //     },
-  //   },
-  // ];
-
-  // always true since 1651276942 is 2025-01-18 08:42:54 UTC
-  const encryptDecryptACL = [
-    {
-      contractAddress: "evmBasic",
-      standardContractType: "timestamp",
-      chain: "base",
-      method: "eth_getBlockByNumber",
-      parameters: ["latest"],
-      returnValueTest: {
-        comparator: ">=",
-        value: "1",
-      },
-    },
-  ];
 
   try {
+    const accessControlConditions =
+      await GatedData.getEncryptDecryptACL(publicKey);
     const decrypted = await Lit.Actions.decryptToSingleNode({
-      accessControlConditions: encryptDecryptACL,
+      accessControlConditions,
       ciphertext,
       dataToEncryptHash,
       authSig: null,

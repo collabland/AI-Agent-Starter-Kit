@@ -278,7 +278,7 @@ declare global {
         dataToEncryptHash,
         authSig,
         chain,
-      }: string): Promise<string>;
+      }): Promise<string>;
       /**
    * Decrypt to a single node.
    * @param {object[]} accessControlConditions The access control conditions
@@ -389,6 +389,10 @@ declare global {
   // TODO: add custom shims here
   export type Buffer = Buffer;
   export const Buffer: typeof Buffer;
+  export namespace GatedData {
+    function getEthereumAddressForPKP(pkp: string): Promise<string>;
+    function getEncryptDecryptACL(pkp: string): Promise<object[]>;
+  }
 
   // TODO: JSParams go here
   const helloName: string;
