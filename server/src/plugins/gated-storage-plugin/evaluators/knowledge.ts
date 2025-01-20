@@ -8,8 +8,6 @@ import {
   ModelClass,
   generateText,
 } from "@ai16z/eliza";
-import { gateDataProvider } from "../providers/provider.js";
-import { GateDataProviderResponseGet } from "../types.js";
 import { StorageService } from "../services/storage.service.js";
 
 export const knowledgeEvaluator: Evaluator = {
@@ -67,29 +65,12 @@ export const knowledgeEvaluator: Evaluator = {
     },
   ],
   handler: async (runtime: IAgentRuntime, memory: Memory, state?: State) => {
-    let context = `${knowledgeEvaluator.examples}
+    const context = `${knowledgeEvaluator.examples}
     Determine if the memory contains important content that reveals subject-matter expertise. Answer only with the following responses:
     - TRUE
     - FALSE
     The following is the memory content: ${memory.content.text}
     `;
-
-    try {
-      // get relevant context
-      const data: GateDataProviderResponseGet = await gateDataProvider.get(
-        runtime,
-        memory,
-        state
-      );
-      if (data.success) {
-        context = `Here is relevant context: ${data.additionalContext}\n${context}`;
-      }
-    } catch (err) {
-      elizaLogger.warn(
-        "[knowledge provider] failed to get additional data provider context ",
-        err
-      );
-    }
 
     // prompt the agent to determine if the memory contains important content
     const res = await generateText({

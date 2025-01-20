@@ -141,10 +141,7 @@ export class StorageService {
     }
   }
 
-  public async getEmbeddingContext(
-    array: number[],
-    address: string
-  ): Promise<string | null> {
+  public async getEmbeddingContext(array: number[]): Promise<string | null> {
     if (!this.orbis) {
       throw new Error("Orbis is not initialized");
     }
