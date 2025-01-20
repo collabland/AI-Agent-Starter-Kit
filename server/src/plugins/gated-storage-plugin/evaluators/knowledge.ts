@@ -111,7 +111,6 @@ export const knowledgeEvaluator: Evaluator = {
   validate: async (_runtime: IAgentRuntime, memory: Memory, state?: State) => {
     // only available if we're able to use remote storage and memory has proper embeddings
     // confirm first that the gate-action plugin has not already stored this memory
-    if (state) console.log("state.hasGatedAndStored", state.hasGatedAndStored);
     if (state && !state.hasGatedAndStored) {
       return StorageService.isMemoryStorable(memory);
     }
