@@ -514,10 +514,6 @@ export class MessageManager {
           state,
           callback
         );
-
-        elizaLogger.debug("[eliza.service] evaluating");
-        const data = await this.runtime.evaluate(memory, state, shouldRespond);
-        elizaLogger.debug(`[eliza.service] evaluated ${data}`);
       }
     } catch (error) {
       console.error("❌ Error handling message:", error);

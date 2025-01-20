@@ -8,7 +8,6 @@ export const gateDataProvider: Provider = {
     _state?: State
   ): Promise<Error | string> => {
     try {
-      console.log("gateDataProvider.get");
       if (!message.embedding) {
         return "";
       } else {
