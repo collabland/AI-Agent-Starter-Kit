@@ -76,12 +76,16 @@ export const gateDataAction: Action = {
 
       const storageService = StorageService.getInstance();
       await storageService.start();
-      if (embedding) {
+      if (embedding && state && !state.hasGatedAndStored) {
         const doc1 = await storageService.storeMessageWithEmbedding(
           content.text,
           embedding,
           true // TODO how can we tell if it's agent or user?
         );
+
+        if (state) {
+          state.hasGatedAndStored = true;
+        }
 
         elizaLogger.debug(
           `[gateDataAction] Stored message with embedding with stream ID ${doc1.id}`

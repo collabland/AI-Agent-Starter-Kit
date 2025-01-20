@@ -94,6 +94,9 @@ export const knowledgeEvaluator: Evaluator = {
         embedding!, // not null since we only run when isMemoryStorable() is true
         true // TODO how can we tell if it's agent or user?
       );
+      if (state) {
+        state.hasGatedAndStored = true;
+      }
       elizaLogger.debug(
         `[knowledge handler] Stored message with embedding with stream ID ${doc.id}`
       );
@@ -105,8 +108,13 @@ export const knowledgeEvaluator: Evaluator = {
     return;
   },
   name: "knowledgeEvaluator",
-  validate: async (_runtime: IAgentRuntime, memory: Memory, _state?: State) => {
+  validate: async (_runtime: IAgentRuntime, memory: Memory, state?: State) => {
     // only available if we're able to use remote storage and memory has proper embeddings
-    return StorageService.isMemoryStorable(memory);
+    // confirm first that the gate-action plugin has not already stored this memory
+    if (state) console.log("state.hasGatedAndStored", state.hasGatedAndStored);
+    if (state && !state.hasGatedAndStored) {
+      return StorageService.isMemoryStorable(memory);
+    }
+    return false;
   },
 };
