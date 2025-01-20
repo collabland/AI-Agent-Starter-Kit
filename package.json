@@ -3,6 +3,8 @@
   "version": "1.5.0",
   "private": true,
   "scripts": {
+    "gen-seed": "node ./server/scripts/seed.mjs",
+    "deploy-model": "node ./server/scripts/deploy-model.mjs",
     "preinstall": "npx only-allow pnpm",
     "predev": "pnpm --filter client run predev && pnpm --filter server run predev && pnpm --filter lit-actions run predev",
     "dev": "node scripts/dev",
