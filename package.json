@@ -6,6 +6,7 @@
     "preinstall": "npx only-allow pnpm",
     "predev": "pnpm --filter client run predev && pnpm --filter server run predev && pnpm --filter lit-actions run predev",
     "dev": "node scripts/dev",
+    "tunnel": "node scripts/tunnel",
     "dev:client": "pnpm --filter client run dev",
     "dev:server": "pnpm --filter server run dev",
     "dev:lit-actions": "pnpm --filter lit-actions run watch",
@@ -20,8 +21,10 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@ngrok/ngrok": "^1.4.1",
     "auto-changelog": "^2.4.0",
     "concurrently": "^8.2.2",
+    "dotenv": "^16.4.5",
     "husky": "^9.1.7",
     "rimraf": "^5.0.5",
     "standard-version": "^9.5.0"

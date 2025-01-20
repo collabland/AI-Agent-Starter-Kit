@@ -3,29 +3,44 @@
 const concurrently = require("concurrently");
 
 const { result } = concurrently([
-    {
-        command: "pnpm run dev:server",
-        name: "server",
-        prefix: "server",
-        prefixColor: "blue",
-        handleInput: true
-    },
-    {
-        command: "pnpm run dev:client",
-        name: "client",
-        prefix: "client",
-        prefixColor: "green",
-        handleInput: true
-    },
-    {
-        command: "pnpm run dev:lit-actions",
-        name: "lit-actions",
-        prefix: "lit-actions",
-        prefixColor: "yellow",
-        handleInput: true
-    }
+  {
+    command: "pnpm run dev:server",
+    name: "server",
+    prefix: "server",
+    prefixColor: "blue",
+    handleInput: true,
+  },
+  {
+    command: "pnpm run dev:client",
+    name: "client",
+    prefix: "client",
+    prefixColor: "green",
+    handleInput: true,
+  },
+  {
+    command: "pnpm run dev:lit-actions",
+    name: "lit-actions",
+    prefix: "lit-actions",
+    prefixColor: "yellow",
+    handleInput: true,
+  },
+  {
+    command: "pnpm run tunnel",
+    name: "tunnel",
+    prefix: "tunnel",
+    prefixColor: "magenta",
+    handleInput: true,
+  },
 ]);
 
 result.catch((err) => {
   console.error(err);
+});
+
+process.on("SIGINT", () => {
+  process.exit(0);
+});
+
+process.on("SIGTERM", () => {
+  process.exit(0);
 });

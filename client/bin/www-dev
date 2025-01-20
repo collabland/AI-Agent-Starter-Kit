@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+
+// ! This script is now deprecated, the tunneling happens in the root script
 const { config } = require("dotenv");
 const { join } = require("path");
 const concurrently = require("concurrently");

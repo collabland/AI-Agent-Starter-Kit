@@ -5,9 +5,8 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "predev": "node bin/validate-env",
-    "dev": "node bin/www-dev",
+    "dev": "next dev",
     "www-tunnel": "node bin/www-tunnel",
-    "next-dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

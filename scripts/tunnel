@@ -1,0 +1,108 @@
+const ngrok = require("@ngrok/ngrok");
+const dotenv = require("dotenv");
+const fs = require("fs/promises");
+const { join } = require("path");
+
+const ENV_PATH = join(__dirname, "..", ".env");
+const CLIENT_ENV_PATH = join(__dirname, "..", "client", ".env");
+
+dotenv.config();
+
+let session;
+let listeners = [];
+
+const updateEnvFile = async (
+  tunnelUrl,
+  envPath = ENV_PATH,
+  variable = "NEXT_PUBLIC_HOSTNAME"
+) => {
+  try {
+    console.log(
+      `Updating tunnel var ${variable} URL in .env (Location: ${envPath})...`
+    );
+    const envContent = await fs.readFile(envPath, "utf-8");
+    const hasHostname = envContent.includes(`${variable}=`);
+
+    if (hasHostname) {
+      const newContent = envContent.replace(
+        new RegExp(`${variable}=.+`),
+        `${variable}=${tunnelUrl}`
+      );
+      await fs.writeFile(envPath, newContent);
+    } else {
+      await fs.appendFile(envPath, `\n${variable}=${tunnelUrl}`);
+    }
+    console.log(
+      `Updated ${variable} in .env (Location: ${envPath}) to ${tunnelUrl}`
+    );
+  } catch (err) {
+    console.error("[ERROR] Failed to update .env file:", err);
+  }
+};
+
+const main = async () => {
+  try {
+    if (!process.env.NGROK_AUTH_TOKEN) {
+      throw new Error("NGROK_AUTH_TOKEN is required");
+    }
+    if (!process.env.NGROK_DOMAIN) {
+      throw new Error("NGROK_DOMAIN is required");
+    }
+    if (!process.env.PORT) {
+      throw new Error("PORT is required");
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    session = await new ngrok.SessionBuilder()
+      .authtoken(process.env.NGROK_AUTH_TOKEN)
+      .handleDisconnection((addr, error) => {
+        console.log(`Disconnected from ${addr}, error: ${error}`);
+        return true;
+      })
+      .connect();
+
+    const server = await session
+      .httpEndpoint()
+      .domain(process.env.NGROK_DOMAIN)
+      .listenAndForward(`http://localhost:${process.env.PORT}`);
+
+    listeners.push(server);
+    console.log("[NGROK] Backend tunnel:", server.url());
+
+    const client = await session
+      .httpEndpoint()
+      .listenAndForward("http://localhost:3000");
+
+    listeners.push(client);
+    console.log("[NGROK] Frontend tunnel:", client.url());
+
+    await updateEnvFile(server.url(), ENV_PATH, "NGROK_URL");
+    await updateEnvFile(client.url(), ENV_PATH, "NEXT_PUBLIC_HOSTNAME");
+    await updateEnvFile(client.url(), CLIENT_ENV_PATH, "NEXT_PUBLIC_HOSTNAME");
+
+    setInterval(() => {
+      console.log("API available at:", server.url());
+      console.log("Front-end available at:", client.url());
+    }, 60 * 1000);
+
+  } catch (error) {
+    console.error("NGROK Error:", error);
+    throw error;
+  }
+};
+
+main().catch((_err) => {
+  process.exit(1);
+});
+
+const cleanup = async () => {
+  if (session) {
+    console.log("\nClosing tunnels...");
+    await session.close();
+  }
+  process.exit(0);
+};
+
+process.on("SIGINT", cleanup);
+process.on("SIGTERM", cleanup);

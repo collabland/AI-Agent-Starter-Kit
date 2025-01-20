@@ -1,4 +1,6 @@
 #! /usr/bin/env node
+
+// ! This script is now deprecated, the tunneling happens in the root script
 import { config } from "dotenv";
 import { join } from "path";
 import { tunnelmole } from "tunnelmole";
