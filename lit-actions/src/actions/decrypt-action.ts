@@ -1,6 +1,7 @@
 // Add this to the top of the file, so that it can reference the global.d.ts file
 /// <reference path="../global.d.ts" />
 
+//@ts-ignore
 const go = async () => {
   if (!ciphertext || !dataToEncryptHash || !chain) {
     Lit.Actions.setResponse({

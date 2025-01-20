@@ -11,6 +11,7 @@ const encryptData = async (to_encrypt: Uint8Array) => {
   return res;
 };
 
+//@ts-ignore
 const go = async () => {
   if (!toEncrypt) {
     Lit.Actions.setResponse({
