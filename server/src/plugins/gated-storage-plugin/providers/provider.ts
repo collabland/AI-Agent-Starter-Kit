@@ -15,7 +15,6 @@ export const gateDataProvider: Provider = {
         if (!storageService.isConfigured()) {
           return "";
         }
-        await storageService.start();
 
         // pass in the user's eth address to get the storage provider
         const additionalContext = await storageService.getEmbeddingContext(

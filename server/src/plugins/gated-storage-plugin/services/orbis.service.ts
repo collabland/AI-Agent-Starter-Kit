@@ -24,36 +24,38 @@ export class Orbis {
   private seed: Uint8Array;
 
   private constructor() {
+    let message = "";
     if (!process.env.ORBIS_GATEWAY_URL) {
-      throw new Error(
-        "ORBIS_GATEWAY_URL is not defined in the environment variables."
-      );
+      message +=
+        "ORBIS_GATEWAY_URL is not defined in the environment variables. ";
     }
     if (!process.env.CERAMIC_NODE_URL) {
-      throw new Error(
-        "CERAMIC_NODE_URL is not defined in the environment variables."
-      );
+      message +=
+        "CERAMIC_NODE_URL is not defined in the environment variables. ";
     }
     if (!process.env.ORBIS_TABLE_ID) {
-      throw new Error(
-        "ORBIS_TABLE_ID is not defined in the environment variables."
-      );
+      message += "ORBIS_TABLE_ID is not defined in the environment variables. ";
     }
     if (!process.env.ORBIS_CONTEXT_ID) {
-      throw new Error(
-        "ORBIS_CONTEXT_ID is not defined in the environment variables."
-      );
+      message +=
+        "ORBIS_CONTEXT_ID is not defined in the environment variables. ";
+    }
+    if (!process.env.ORBIS_SEED) {
+      message += "ORBIS_SEED is not defined in the environment variables. ";
+    }
+    if (message) {
+      throw new Error(message);
     }
     this.contextId = process.env.ORBIS_CONTEXT_ID!;
     this.seed = new Uint8Array(JSON.parse(process.env.ORBIS_SEED!));
     this.tableId = process.env.ORBIS_TABLE_ID!;
     this.db = new OrbisDB({
       ceramic: {
-        gateway: process.env.CERAMIC_NODE_URL,
+        gateway: process.env.CERAMIC_NODE_URL!,
       },
       nodes: [
         {
-          gateway: process.env.ORBIS_GATEWAY_URL,
+          gateway: process.env.ORBIS_GATEWAY_URL!,
         },
       ],
     });

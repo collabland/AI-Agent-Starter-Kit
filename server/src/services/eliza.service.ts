@@ -42,6 +42,7 @@ import { Message } from "grammy/types";
 import { Bot, Context } from "grammy";
 import { bootstrapPlugin } from "@ai16z/plugin-bootstrap";
 import { collablandPlugin } from "../plugins/collabland.plugin.js";
+import { StorageService } from "../plugins/gated-storage-plugin/services/storage.service.js";
 
 const MAX_MESSAGE_LENGTH = 4096; // Telegram's max message length
 
@@ -401,8 +402,6 @@ export class MessageManager {
         return; // Skip if no content
       }
 
-      // get additional context from the database
-
       const content: Content = {
         text: fullText,
         source: "telegram",
@@ -435,8 +434,6 @@ export class MessageManager {
       const shouldRespond = await this._shouldRespond(message, state);
 
       if (shouldRespond) {
-        // Generate response
-        // todo: add additional context to the message
         const context = composeContext({
           state,
           template:
@@ -622,6 +619,13 @@ export class ElizaService extends BaseService {
   }
 
   public async start(): Promise<void> {
+    try {
+      // make sure this gets initialized before anything tries to use it in the plugin.
+      // not sure where this should actually be hooked up
+      await StorageService.getInstance().start();
+    } catch (err) {
+      elizaLogger.warn("[eliza] gated storage service is unavailable");
+    }
     try {
       //register AI based command handlers here
       this.bot.command("eliza", (ctx) =>

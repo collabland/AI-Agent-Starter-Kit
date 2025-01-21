@@ -104,7 +104,7 @@ export const gateDataAction: Action = {
       );
     } catch (error) {
       elizaLogger.error(
-        "Error in GATE_DATA action",
+        "[gateDataAction] error ",
         JSON.stringify(error, null, 2)
       );
     }

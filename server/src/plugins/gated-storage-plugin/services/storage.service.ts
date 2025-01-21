@@ -27,14 +27,15 @@ export class StorageService {
     this.started = false;
   }
 
-  public static getInstance(): StorageService {
+  static getInstance(): StorageService {
     if (!StorageService.instance) {
       StorageService.instance = new StorageService();
     }
     return StorageService.instance;
   }
 
-  public async start(): Promise<void> {
+  /// Should be called before trying to use isConfigured, else it will never be configured
+  async start(): Promise<void> {
     if (this.started) {
       return;
     }
@@ -76,7 +77,8 @@ export class StorageService {
     }
   }
 
-  public isConfigured(): boolean {
+  /// Must call `start()` before using this the first time
+  isConfigured(): boolean {
     if (!this.orbis) {
       elizaLogger.warn(
         "[storage.service] Orbis is not initialized. Gated data is disabled."
@@ -103,14 +105,14 @@ export class StorageService {
     }
     if (!OPENAI_EMBEDDINGS) {
       elizaLogger.warn(
-        "[storage.service] Not using OPENAI embeddings. Use `isMemoryStorable()` to check before calling. Gated data is disabled."
+        "[storage.service] Not using OPENAI embeddings. Gated data is disabled."
       );
       return false;
     }
     return true;
   }
 
-  public async storeMessageWithEmbedding(
+  async storeMessageWithEmbedding(
     context: string,
     embedding: number[],
     is_user: boolean
@@ -163,7 +165,7 @@ export class StorageService {
     }
   }
 
-  public async getEmbeddingContext(array: number[]): Promise<string | null> {
+  async getEmbeddingContext(array: number[]): Promise<string | null> {
     if (!this.isConfigured()) {
       return null;
     }
@@ -240,11 +242,7 @@ export class StorageService {
     }
   }
 
-  public async stop(): Promise<void> {
-    this.orbis = null;
-  }
-
-  public static isMemoryStorable(memory: Memory): boolean {
+  static isMemoryStorable(memory: Memory): boolean {
     if (OPENAI_EMBEDDINGS && memory?.embedding != getEmbeddingZeroVector()) {
       return true;
     }

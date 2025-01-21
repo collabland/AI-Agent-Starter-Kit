@@ -223,6 +223,7 @@ You can view the token page below (it takes a few minutes to be visible)`,
             ctx.reply(`Action not found: ${action}`);
             return;
           }
+          // ! NOTE: You can send any jsParams you want here, it depends on your Lit action code
           let jsParams;
           // ! NOTE: You can change the chainId to any chain you want to execute the action on
           const chainId = 8453;
@@ -265,7 +266,6 @@ You can view the token page below (it takes a few minutes to be visible)`,
             case "encrypt-action": {
               const message =
                 ctx.from?.username ?? ctx.from?.first_name ?? "test data";
-              // ! NOTE: You can send any jsParams you want here, it depends on your Lit action code
               jsParams = {
                 toEncrypt: `${message}-${new Date().toUTCString()}`,
               };

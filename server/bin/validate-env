@@ -60,7 +60,7 @@ const ENV_HINTS = {
     "Enter your Twitter access token secret, you can get it from Twitter Developer Portal, go to https://developer.twitter.com/en/portal/dashboard to create one",
   // Add more hints as needed from .env.example
   ORBIS_CONTEXT_ID:
-    "set up in your Orbis UI running on localhost:7008 (once your Orbis server is running)",
+    "Enter your Orbis Context ID. Set up in your Orbis UI on localhost:7008 after starting server",
   ORBIS_TABLE_ID:
     "Orbis embeddings table ID e.g. 'kjzl6hvfrbw6ca77573ixbqbfvz8062vg2rw7rwude5baqeob9koy4jhvsmois7'. Replace it with your own table ID with pnpm run deploy-model",
   ORBIS_SEED:

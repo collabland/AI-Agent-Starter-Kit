@@ -16,7 +16,7 @@ const go = async () => {
   try {
     const accessControlConditions =
       await GatedData.getEncryptDecryptACL(publicKey);
-    const decrypted = await Lit.Actions.decryptAndCombine({
+    const decrypted = await Lit.Actions.decryptToSingleNode({
       accessControlConditions,
       ciphertext,
       dataToEncryptHash,
