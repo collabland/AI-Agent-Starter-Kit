@@ -593,7 +593,7 @@ export class ElizaService extends BaseService {
       this.runtime = new AgentRuntime({
         databaseAdapter: db,
         token: process.env.OPENAI_API_KEY || "",
-        modelProvider: character.modelProvider || ModelProviderName.GAIANET,
+        modelProvider: character.modelProvider || ModelProviderName.OPENAI,
         character,
         conversationLength: 4096,
         plugins: [bootstrapPlugin, collablandPlugin, gateDataPlugin],

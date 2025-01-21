@@ -62,14 +62,17 @@ export const gateDataAction: Action = {
   ],
 
   validate: async (
-    runtime: IAgentRuntime,
+    _runtime: IAgentRuntime,
     message: Memory,
     _state?: State
   ): Promise<boolean> => {
-    return StorageService.isMemoryStorable(message);
+    return (
+      StorageService.getInstance().isConfigured() &&
+      StorageService.isMemoryStorable(message)
+    );
   },
 
-  handler: async (runtime: IAgentRuntime, message: Memory, state?: State) => {
+  handler: async (_runtime: IAgentRuntime, message: Memory, state?: State) => {
     try {
       elizaLogger.log("[gateDataAction] Gating data now...");
       const { content, embedding } = message;
@@ -82,6 +85,9 @@ export const gateDataAction: Action = {
           embedding,
           true // TODO how can we tell if it's agent or user?
         );
+        if (!doc1) {
+          return;
+        }
 
         if (state) {
           state.hasGatedAndStored = true;

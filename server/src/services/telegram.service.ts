@@ -17,7 +17,7 @@ import { TwitterService } from "./twitter.service.js";
 import { NgrokService } from "./ngrok.service.js";
 
 // hack to avoid 400 errors sending params back to telegram. not even close to perfect
-const htmlEscape = (key: AnyType, val: AnyType) => {
+const htmlEscape = (_key: AnyType, val: AnyType) => {
   if (typeof val === "string") {
     return val
       .replace(/&/g, "&amp;")
@@ -239,8 +239,7 @@ You can view the token page below (it takes a few minutes to be visible)`,
               };
               break;
             }
-            case "decrypt-action":
-            case "decrypt-action2": {
+            case "decrypt-action": {
               const toEncrypt = `encrypt-decrypt-test-${new Date().toUTCString()}`;
               ctx.reply(`Invoking encrypt action with ${toEncrypt}`);
               const { data } = await client.post(

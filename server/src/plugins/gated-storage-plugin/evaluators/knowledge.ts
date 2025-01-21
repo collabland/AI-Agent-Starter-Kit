@@ -29,35 +29,15 @@ export const knowledgeEvaluator: Evaluator = {
           },
         },
         {
-          user: "{{agentName}}",
-          content: {
-            text: "I can help you design this system - what are some code references for how Lit Actions are built?",
-          },
-        },
-        {
           user: "{{user1}}",
           content: {
             text: "The mantis shrimp's eyes have 16 types of photoreceptor cells, allowing them to see ultraviolet and polarized light, far beyond human capabilities.",
           },
         },
         {
-          user: "{{agentName}}",
-          content: {
-            text: "Gating data now...",
-            action: "GATE_DATA",
-          },
-        },
-        {
           user: "{{user1}}",
           content: {
             text: "Neutron stars are so dense that a sugar-cube-sized piece of one would weigh about a billion tons on Earth.",
-          },
-        },
-        {
-          user: "{{agentName}}",
-          content: {
-            text: "Gating data now...",
-            action: "GATE_DATA",
           },
         },
       ] as ActionExample[],
@@ -71,6 +51,7 @@ export const knowledgeEvaluator: Evaluator = {
     - FALSE
     The following is the memory content: ${memory.content.text}
     `;
+    console.log("here", context);
 
     // prompt the agent to determine if the memory contains important content
     const res = await generateText({
@@ -94,6 +75,9 @@ export const knowledgeEvaluator: Evaluator = {
         embedding!, // not null since we only run when isMemoryStorable() is true
         true // TODO how can we tell if it's agent or user?
       );
+      if (!doc) {
+        return;
+      }
       if (state) {
         state.hasGatedAndStored = true;
       }
@@ -111,7 +95,10 @@ export const knowledgeEvaluator: Evaluator = {
   validate: async (_runtime: IAgentRuntime, memory: Memory, state?: State) => {
     // only available if we're able to use remote storage and memory has proper embeddings
     // confirm first that the gate-action plugin has not already stored this memory
-    if (state && !state.hasGatedAndStored) {
+    if (
+      StorageService.getInstance().isConfigured() &&
+      !state?.hasGatedAndStored
+    ) {
       return StorageService.isMemoryStorable(memory);
     }
     return false;

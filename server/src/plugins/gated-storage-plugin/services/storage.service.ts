@@ -5,7 +5,6 @@ import fs from "fs";
 import { getCollablandApiUrl } from "../../../utils.js";
 import path, { resolve } from "path";
 import { elizaLogger, getEmbeddingZeroVector, Memory } from "@ai16z/eliza";
-import { ElizaService } from "src/services/eliza.service.js";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 const chainId = 8453;
@@ -72,29 +71,52 @@ export class StorageService {
       this.started = true;
       return;
     } catch (error) {
-      console.error("Error starting StorageService:", error);
-      throw error;
+      // just log instead of throw since variables may not be configured
+      console.warn("Error starting StorageService:", error);
     }
+  }
+
+  public isConfigured(): boolean {
+    if (!this.orbis) {
+      elizaLogger.warn(
+        "[storage.service] Orbis is not initialized. Gated data is disabled."
+      );
+      return false;
+    }
+    if (!this.encryptActionHash) {
+      elizaLogger.warn(
+        "[storage.service] Encrypt action hash is not initialized. Gated data is disabled."
+      );
+      return false;
+    }
+    if (!this.decryptActionHash) {
+      elizaLogger.warn(
+        "[storage.service] Decrypt action hash is not initialized. Gated data is disabled."
+      );
+      return false;
+    }
+    if (!this.client) {
+      elizaLogger.warn(
+        "[storage.service] is not initialized. Gated data is disabled."
+      );
+      return false;
+    }
+    if (!OPENAI_EMBEDDINGS) {
+      elizaLogger.warn(
+        "[storage.service] Not using OPENAI embeddings. Use `isMemoryStorable()` to check before calling. Gated data is disabled."
+      );
+      return false;
+    }
+    return true;
   }
 
   public async storeMessageWithEmbedding(
     context: string,
     embedding: number[],
     is_user: boolean
-  ): Promise<CeramicDocument> {
-    if (!this.orbis) {
-      throw new Error("Orbis is not initialized");
-    }
-    if (!this.encryptActionHash) {
-      throw new Error("Encrypt action hash is not initialized");
-    }
-    if (!this.client) {
-      throw new Error("Client is not initialized");
-    }
-    if (!OPENAI_EMBEDDINGS) {
-      throw new Error(
-        "Not use OPENAI embeddings. Use `isMemoryStorable()` to check before calling"
-      );
+  ): Promise<CeramicDocument | null> {
+    if (!this.isConfigured) {
+      return null;
     }
     if (embedding == getEmbeddingZeroVector()) {
       throw new Error(
@@ -104,7 +126,7 @@ export class StorageService {
     elizaLogger.debug("[storage.service] attempting to encrypt data");
     try {
       // data will be JSON.stringify({ ciphertext, dataToEncryptHash })
-      const { data } = await this.client.post(
+      const { data } = await this.client!.post(
         `/telegrambot/executeLitActionUsingPKP?chainId=${chainId}`,
         {
           actionIpfs: this.encryptActionHash,
@@ -124,7 +146,7 @@ export class StorageService {
             embedding,
             is_user,
           };
-          const doc = await this.orbis.updateOrbis(content as ServerMessage);
+          const doc = await this.orbis!.updateOrbis(content as ServerMessage);
           return doc;
         } else {
           throw new Error(`Encryption failed: data=${JSON.stringify(data)}`);
@@ -142,25 +164,12 @@ export class StorageService {
   }
 
   public async getEmbeddingContext(array: number[]): Promise<string | null> {
-    if (!this.orbis) {
-      throw new Error("Orbis is not initialized");
-    }
-    if (!process.env.ORBIS_TABLE_ID) {
-      throw new Error(
-        "ORBIS_TABLE_ID is not defined in the environment variables."
-      );
+    if (!this.isConfigured()) {
+      return null;
     }
 
     try {
-      const formattedEmbedding = `ARRAY[${array.join(", ")}]::vector`;
-      const query = `
-            SELECT stream_id, content, is_user, embedding <=> ${formattedEmbedding} AS similarity
-            FROM ${process.env.ORBIS_TABLE_ID}
-            ORDER BY similarity ASC
-            LIMIT 5;
-            `;
-      const context = await this.orbis.queryKnowledgeIndex(query);
-
+      const context = await this.orbis!.queryKnowledgeEmbeddings(array);
       if (!context) {
         return null;
       }

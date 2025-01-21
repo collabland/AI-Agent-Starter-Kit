@@ -1,6 +1,6 @@
 import { OrbisDB, OrbisConnectResult, CeramicDocument } from "@useorbis/db-sdk";
 import { OrbisKeyDidAuth } from "@useorbis/db-sdk/auth";
-import { Memory, Content, elizaLogger } from "@ai16z/eliza";
+import { elizaLogger } from "@ai16z/eliza";
 import { maskEmbedding } from "./storage.service.js";
 
 export type ServerMessage = {
@@ -19,6 +19,9 @@ export type VerifiedContent = {
 export class Orbis {
   private static instance: Orbis;
   private db: OrbisDB;
+  private tableId: string;
+  private contextId: string;
+  private seed: Uint8Array;
 
   private constructor() {
     if (!process.env.ORBIS_GATEWAY_URL) {
@@ -31,6 +34,19 @@ export class Orbis {
         "CERAMIC_NODE_URL is not defined in the environment variables."
       );
     }
+    if (!process.env.ORBIS_TABLE_ID) {
+      throw new Error(
+        "ORBIS_TABLE_ID is not defined in the environment variables."
+      );
+    }
+    if (!process.env.ORBIS_CONTEXT_ID) {
+      throw new Error(
+        "ORBIS_CONTEXT_ID is not defined in the environment variables."
+      );
+    }
+    this.contextId = process.env.ORBIS_CONTEXT_ID!;
+    this.seed = new Uint8Array(JSON.parse(process.env.ORBIS_SEED!));
+    this.tableId = process.env.ORBIS_TABLE_ID!;
     this.db = new OrbisDB({
       ceramic: {
         gateway: process.env.CERAMIC_NODE_URL,
@@ -43,25 +59,19 @@ export class Orbis {
     });
   }
 
-  public static getInstance(): Orbis {
+  static getInstance(): Orbis {
     if (!Orbis.instance) {
       Orbis.instance = new Orbis();
     }
     return Orbis.instance;
   }
 
-  public async getAuthenticatedInstance(): Promise<OrbisConnectResult> {
-    if (!process.env.ORBIS_SEED) {
-      throw new Error(
-        "ORBIS_SEED is not defined in the environment variables."
-      );
-    }
-    const seed = new Uint8Array(JSON.parse(process.env.ORBIS_SEED));
-    const auth = await OrbisKeyDidAuth.fromSeed(seed);
+  async getAuthenticatedInstance(): Promise<OrbisConnectResult> {
+    const auth = await OrbisKeyDidAuth.fromSeed(this.seed);
     return await this.db.connectUser({ auth });
   }
 
-  public async getController(): Promise<string> {
+  async getController(): Promise<string> {
     await this.getAuthenticatedInstance();
     if (!this.db.did?.id) {
       throw new Error("Ceramic DID not initialized");
@@ -69,24 +79,14 @@ export class Orbis {
     return this.db.did?.id;
   }
 
-  public async updateOrbis(content: ServerMessage): Promise<CeramicDocument> {
-    if (!process.env.ORBIS_TABLE_ID) {
-      throw new Error(
-        "ORBIS_TABLE_ID is not defined in the environment variables."
-      );
-    }
-    if (!process.env.ORBIS_CONTEXT_ID) {
-      throw new Error(
-        "ORBIS_CONTEXT_ID is not defined in the environment variables."
-      );
-    }
+  async updateOrbis(content: ServerMessage): Promise<CeramicDocument> {
     try {
       await this.getAuthenticatedInstance();
 
       const res = await this.db
-        .insert(process.env.ORBIS_TABLE_ID)
+        .insert(this.tableId)
         .value(content)
-        .context(process.env.ORBIS_CONTEXT_ID)
+        .context(this.contextId)
         .run();
       return res;
     } catch (err) {
@@ -98,31 +98,22 @@ export class Orbis {
     }
   }
 
-  public async createVerifiedEntry(
-    content: VerifiedContent
-  ): Promise<CeramicDocument> {
-    if (!process.env.VERIFIED_TABLE) {
-      throw new Error("Missing verified table");
-    }
-    if (!process.env.ORBIS_CONTEXT_ID) {
-      throw new Error(
-        "ORBIS_CONTEXT_ID is not defined in the environment variables."
-      );
-    }
-    try {
-      await this.getAuthenticatedInstance();
-      return await this.db
-        .insert(process.env.VERIFIED_TABLE)
-        .value(content)
-        .context(process.env.ORBIS_CONTEXT_ID)
-        .run();
-    } catch (error) {
-      console.error("Error storing message:", error);
-      throw error;
-    }
+  async queryKnowledgeEmbeddings(embedding: number[]): Promise<{
+    columns: Array<string>;
+    rows: ServerMessage[];
+  } | null> {
+    const formattedEmbedding = `ARRAY[${embedding.join(", ")}]::vector`;
+    const query = `
+          SELECT stream_id, content, is_user, embedding <=> ${formattedEmbedding} AS similarity
+          FROM ${this.tableId}
+          ORDER BY similarity ASC
+          LIMIT 5;
+          `;
+    const context = await this.queryKnowledgeIndex(query);
+    return context;
   }
 
-  public async queryKnowledgeIndex(text: string): Promise<{
+  private async queryKnowledgeIndex(text: string): Promise<{
     columns: Array<string>;
     rows: ServerMessage[];
   } | null> {

@@ -3,7 +3,7 @@ import { StorageService } from "../services/storage.service.js";
 
 export const gateDataProvider: Provider = {
   get: async (
-    runtime: IAgentRuntime,
+    _runtime: IAgentRuntime,
     message: Memory,
     _state?: State
   ): Promise<Error | string> => {
@@ -12,6 +12,9 @@ export const gateDataProvider: Provider = {
         return "";
       } else {
         const storageService = StorageService.getInstance();
+        if (!storageService.isConfigured()) {
+          return "";
+        }
         await storageService.start();
 
         // pass in the user's eth address to get the storage provider

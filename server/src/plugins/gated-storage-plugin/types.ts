@@ -1,5 +1,4 @@
 import { Content } from "@ai16z/eliza";
-import { type StorageService } from "./services/storage.service.js";
 
 export interface GateDataConfig {
   provider: {
