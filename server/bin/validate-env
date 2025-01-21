@@ -59,6 +59,14 @@ const ENV_HINTS = {
   TWITTER_ACCESS_TOKEN_SECRET:
     "Enter your Twitter access token secret, you can get it from Twitter Developer Portal, go to https://developer.twitter.com/en/portal/dashboard to create one",
   // Add more hints as needed from .env.example
+  ORBIS_CONTEXT_ID:
+    "set up in your Orbis UI running on localhost:7008 (once your Orbis server is running)",
+  ORBIS_TABLE_ID:
+    "Orbis embeddings table ID e.g. 'kjzl6hvfrbw6ca77573ixbqbfvz8062vg2rw7rwude5baqeob9koy4jhvsmois7'. Replace it with your own table ID with pnpm run deploy-model",
+  ORBIS_SEED:
+    "e.g. [2, 19, ..., 241]. Replace it with your own seed with pnpm run gen-seed",
+  ORBIS_GATEWAY_URL: "Your local Orbis server URL e.g. http://localhost:7008",
+  CERAMIC_NODE_URL: "https://ceramic-orbisdb-mainnet-direct.hirenodes.io/",
 };
 
 const rl = readline.createInterface({

@@ -14,7 +14,7 @@
   "ignorePatterns": [
     "dist/",
     "node_modules/",
-    "/shims/",
+    "shims/",
     "actions/",
     "src/global.d.ts"
   ],
