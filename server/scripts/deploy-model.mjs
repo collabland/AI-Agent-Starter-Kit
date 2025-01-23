@@ -18,20 +18,32 @@ const embeddingModel = {
   schema: {
     type: "object",
     properties: {
-      content: {
-        type: "string",
-      },
-      is_user: {
-        type: "boolean",
-      },
       embedding: {
         type: "array",
         items: {
           type: "number",
         },
+        examples: [
+          {
+            "x-orbisdb": {
+              postgres: {
+                type: "vector(1536)",
+                index: {
+                  method: "ivfflat",
+                  storage: "(lists = 100)",
+                  predicate: "embedding IS NOT NULL",
+                },
+                extensions: ["vector"],
+              },
+            },
+          },
+        ],
       },
-      contenthash: {
+      content: {
         type: "string",
+      },
+      is_user: {
+        type: "boolean",
       },
     },
     additionalProperties: false,
@@ -39,7 +51,7 @@ const embeddingModel = {
   version: "2.0",
   interface: false,
   implements: [],
-  description: "Embedding model",
+  description: "Embedding Test model",
   accountRelation: {
     type: "list",
   },
