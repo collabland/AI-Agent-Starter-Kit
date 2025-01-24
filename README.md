@@ -239,12 +239,17 @@ pnpm run dev
 
   2. On the right-hand side of the same page, you should see a variable called "Environment ID" - this is the DID representation of the address you used to sign into the hosted Orbis studio. Assign this value to `ORBIS_ENV` in your .env file
 
-  3. Finally, deploy your OrbisDB data model we will use to create and query via vector search. Copy the value prefixed with "k" into your `.env` file next to `ORBIS_TABLE_ID`:
+  3. Generate an OrbisDB seed to self-authenticate onto the Ceramic network and save to `ORBIS_SEED`:
+    ```sh
+    pnpm gen-seed
+    ```
+
+  4. Finally, deploy your OrbisDB data model we will use to create and query via vector search. Copy the value prefixed with "k" into your `.env` file next to `ORBIS_TABLE_ID`:
     ```sh
     pnpm deploy-model
     ```
 
-  4. You can use the default provided values for `ORBIS_GATEWAY_URL` AND `CERAMIC_NODE_URL` provided in your .env.example file as-is
+  5. You can use the default provided values for `ORBIS_GATEWAY_URL` AND `CERAMIC_NODE_URL` provided in your .env.example file as-is
 
 **Note**: For production, update the Homepage URL and callback URL to your production domain.
 
