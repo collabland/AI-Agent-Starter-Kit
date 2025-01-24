@@ -22,6 +22,8 @@ export class TelegramService extends BaseService {
   private bot: Bot;
   private webhookUrl: string;
   private elizaService: ElizaService;
+  private nGrokService: NgrokService;
+  private twitterService?: TwitterService;
 
   private constructor(webhookUrl?: string) {
     super();
@@ -82,9 +84,22 @@ export class TelegramService extends BaseService {
         console.error("Telegram bot error:", error);
       });
       await this.elizaService.start();
+      // required when starting server for telegram webooks
+      this.nGrokService = await NgrokService.getInstance();
+      try {
+        this.twitterService = await TwitterService.getInstance();
+        console.log(
+          "Twitter Bot Profile:",
+          JSON.stringify(this.twitterService.me, null, 2)
+        );
+      } catch (err) {
+        console.log(
+          "[WARN] [telegram.service] Unable to use twitter. Functionality will be disabled",
+          err
+        );
+      }
 
       this.bot.command("mint", async (ctx) => {
-        const ngrokURL = await NgrokService.getInstance().getUrl();
         try {
           ctx.reply("Minting your token...");
           const tokenPath = getTokenMetadataPath();
@@ -132,48 +147,51 @@ You can view the token page below (it takes a few minutes to be visible)`,
               parse_mode: "HTML",
             }
           );
-          const twitterClient = await TwitterService.getInstance().getScraper();
-          const twitterBotInfo = await twitterClient.me();
-          await ctx.reply(
-            `🐦 Posting a tweet about the new token...\n\n` +
-              `Twitter account details:\n<pre lang="json"><code>${JSON.stringify(
-                twitterBotInfo,
-                null,
-                2
-              )}</code></pre>`,
-            {
-              parse_mode: "HTML",
-            }
-          );
-          const claimURL = `${process.env.NEXT_PUBLIC_HOSTNAME}/claim/${tokenData.address}`;
-          const botUsername = twitterBotInfo?.username;
-          console.log("botUsername:", botUsername);
-          console.log("claimURL:", claimURL);
-          const slug =
-            Buffer.from(claimURL).toString("base64url") +
-            ":" +
-            Buffer.from(botUsername!).toString("base64url");
-          console.log("slug:", slug);
-          const cardURL = `${ngrokURL}/auth/twitter/card/${slug}/index.html`;
-          console.log("cardURL:", cardURL);
-          const twtRes = await twitterClient.sendTweet(
-            `I just minted a token on Base using Wow!\nThe ticker is $${tokenData.symbol}\nClaim early alpha here: ${cardURL}`
-          );
-          if (twtRes.ok) {
-            const tweetId = (await twtRes.json()) as AnyType;
-            console.log("Tweet posted successfully:", tweetId);
-            const tweetURL = `https://twitter.com/${twitterBotInfo?.username}/status/${tweetId?.data?.create_tweet?.tweet_results?.result?.rest_id}`;
-            console.log("Tweet URL:", tweetURL);
+          if (this.twitterService) {
+            const twitterBotInfo = this.twitterService.me;
+            const twitterClient = this.twitterService.getScraper();
+            const ngrokURL = this.nGrokService.getUrl();
             await ctx.reply(
-              `Tweet posted successfully!\n\n` +
-                `🎉 Tweet details: ${tweetURL}`,
+              `🐦 Posting a tweet about the new token...\n\n` +
+                `Twitter account details:\n<pre lang="json"><code>${JSON.stringify(
+                  twitterBotInfo,
+                  null,
+                  2
+                )}</code></pre>`,
               {
                 parse_mode: "HTML",
               }
             );
-          } else {
-            console.error("Failed to post tweet:", await twtRes.json());
-            await ctx.reply("Failed to post tweet");
+            const claimURL = `${process.env.NEXT_PUBLIC_HOSTNAME}/claim/${tokenData.address}`;
+            const botUsername = twitterBotInfo?.username;
+            console.log("botUsername:", botUsername);
+            console.log("claimURL:", claimURL);
+            const slug =
+              Buffer.from(claimURL).toString("base64url") +
+              ":" +
+              Buffer.from(botUsername!).toString("base64url");
+            console.log("slug:", slug);
+            const cardURL = `${ngrokURL}/auth/twitter/card/${slug}/index.html`;
+            console.log("cardURL:", cardURL);
+            const twtRes = await twitterClient.sendTweet(
+              `I just minted a token on Base using Wow!\nThe ticker is $${tokenData.symbol}\nClaim early alpha here: ${cardURL}`
+            );
+            if (twtRes.ok) {
+              const tweetId = (await twtRes.json()) as AnyType;
+              console.log("Tweet posted successfully:", tweetId);
+              const tweetURL = `https://twitter.com/${twitterBotInfo?.username}/status/${tweetId?.data?.create_tweet?.tweet_results?.result?.rest_id}`;
+              console.log("Tweet URL:", tweetURL);
+              await ctx.reply(
+                `Tweet posted successfully!\n\n` +
+                  `🎉 Tweet details: ${tweetURL}`,
+                {
+                  parse_mode: "HTML",
+                }
+              );
+            } else {
+              console.error("Failed to post tweet:", await twtRes.json());
+              await ctx.reply("Failed to post tweet");
+            }
           }
         } catch (error) {
           if (isAxiosError(error)) {

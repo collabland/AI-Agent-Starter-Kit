@@ -15,29 +15,28 @@ async function loginTwitter() {
   console.log("Loading Twitter environment variables...");
   const scraper = new Scraper();
   console.log("Logging in to Twitter...");
+  let errMessage = "";
   if (!process.env.TWITTER_USERNAME) {
-    console.error("TWITTER_USERNAME is not set");
-    process.exit(1);
+    errMessage += "TWITTER_USERNAME is not set ";
   }
   if (!process.env.TWITTER_PASSWORD) {
-    console.error("TWITTER_PASSWORD is not set");
-    process.exit(1);
+    errMessage += "TWITTER_PASSWORD is not set ";
   }
   if (!process.env.TWITTER_API_KEY) {
-    console.error("TWITTER_API_KEY is not set");
-    process.exit(1);
+    errMessage += "TWITTER_API_KEY is not set ";
   }
   if (!process.env.TWITTER_API_SECRET_KEY) {
-    console.error("TWITTER_API_SECRET_KEY is not set");
-    process.exit(1);
+    errMessage += "TWITTER_API_SECRET_KEY is not set ";
   }
   if (!process.env.TWITTER_ACCESS_TOKEN) {
-    console.error("TWITTER_ACCESS_TOKEN is not set");
-    process.exit(1);
+    errMessage += "TWITTER_ACCESS_TOKEN is not set ";
   }
   if (!process.env.TWITTER_ACCESS_TOKEN_SECRET) {
-    console.error("TWITTER_ACCESS_TOKEN_SECRET is not set");
-    process.exit(1);
+    errMessage += "TWITTER_ACCESS_TOKEN_SECRET is not set ";
+  }
+  if (errMessage) {
+    console.error(`Missing twitter configuraiton: ${errMessage}`);
+    throw new Error(errMessage);
   }
   await scraper.login(
     process.env.TWITTER_USERNAME,
@@ -70,13 +69,17 @@ async function main() {
     console.log(
       "[INFO] twitter-cookies.json does not exist, creating a new one..."
     );
-    const cookies = await loginTwitter();
-    // store the cookies in twitter-cookies.json in the cookies property
-    fs.writeFileSync(
-      twitterCookiesPath,
-      JSON.stringify({ cookies: cookies.map((cookie) => cookie.toString()) })
-    );
-    console.log("Twitter cookies saved to:", twitterCookiesPath);
+    try {
+      const cookies = await loginTwitter();
+      // store the cookies in twitter-cookies.json in the cookies property
+      fs.writeFileSync(
+        twitterCookiesPath,
+        JSON.stringify({ cookies: cookies.map((cookie) => cookie.toString()) })
+      );
+      console.log("[INFO] Twitter cookies saved to:", twitterCookiesPath);
+    } catch (err) {
+      console.log("[WARN] Unable to connect to twitter ", err);
+    }
   }
 }
 
