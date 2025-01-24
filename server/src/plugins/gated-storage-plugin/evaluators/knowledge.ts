@@ -45,13 +45,31 @@ export const knowledgeEvaluator: Evaluator = {
     },
   ],
   handler: async (runtime: IAgentRuntime, memory: Memory, state?: State) => {
-    const context = `${knowledgeEvaluator.examples}
-    Determine if the memory contains important content that reveals subject-matter expertise. Answer only with the following responses:
+    const context = `
+    ${JSON.stringify(knowledgeEvaluator.examples[0].messages)}
+    \n
+    ## Instructions for the agent:
+    Determine if the memory contains important content from the participant's query that reveals subject-matter expertise. If the memory is simply a question or a statement that does not reveal subject-matter expertise, the memory is not important.
+
+    ## Examples of not important content:
+    - "What can you tell me about cross-chain account management?"
+    - "I am interested in learning more about the history of EVM chains."
+    - "What are the best available tools for managing secure wallet authentication?"
+
+    ## Examples of important content:
+    - "I know that you can use a Lit Action to allow AI agents to use their PKPs to encrypt and decrypt data without revealing private keys to users. This is a great way to ensure that user data is secure and private. How can I implement this feature in my application?"
+    - "Did you know that the mantis shrimp's eyes have 16 types of photoreceptor cells, allowing them to see ultraviolet and polarized light, far beyond human capabilities? This is an interesting fact that I recently learned and I thought you might find it interesting as well."
+    - "Neutron stars are so dense that a sugar-cube-sized piece of one would weigh about a billion tons on Earth. This is an incredible fact that I recently discovered and I wanted to share it with you."
+    - "Cross-chain account management allows users to control and manage their accounts and assets across different blockchain networks"
+    - "Cross-chain bridges and protocols are often targeted by attackers, with exploits leading to significant losses in the past."
+
+    Keep in mind that the important content should reveal subject-matter expertise or knowledge that can be of various topics and not just limited to the examples provided above.
+    
+    Answer only with the following responses:
     - TRUE
     - FALSE
-    The following is the memory content: ${memory.content.text}
-    `;
-    console.log("here", context);
+
+    The following is the memory content you need to evaluate: ${memory.content.text}`;
 
     // prompt the agent to determine if the memory contains important content
     const res = await generateText({
