@@ -233,43 +233,18 @@ pnpm run dev
      GITHUB_CLIENT_SECRET=1234567890abcdef1234567890abcdef12345678
      ```
 
-- `ORBIS_CONTEXT_ID`, `ORBIS_TABLE_ID`, & `ORBIS_SEED`: OrbisDB table identifiers to enable gated memory storage functionality
+- `ORBIS_CONTEXT_ID`, `ORBIS_TABLE_ID`, & `ORBIS_ENV`: OrbisDB table identifiers to enable gated memory storage functionality
 
-  1. In a separate terminal, clone this modified version of OrbisDB and install the dependencies
+  1. Visit the [Orbis Studio](https://studio.useorbis.com/) and log in with your browser wallet. Once logged in, set up a new context under the `Contexts` tab. Assign that value to `ORBIS_CONTEXT_ID` in your .env file
 
-  ```sh
-  git clone https://github.com/ceramicstudio/orbisdb
-  cd orbisdb
-  npm install
-  ```
+  2. On the right-hand side of the same page, you should see a variable called "Environment ID" - this is the DID representation of the address you used to sign into the hosted Orbis studio. Assign this value to `ORBIS_ENV` in your .env file
 
-  2. In your orbisdb terminal, start the database process
-    ```sh
-    # Ensure that you have your Docker Daemon running in the background first
-    npm run dev
-    ```
-  3. Your OrbisDB instance will need to initially be configured using the GUI running on `localhost:7008`. Navigate to this address in your browser and follow these steps
-  4. For "Ceramic node URL" enter the following value: `https://ceramic-orbisdb-mainnet-direct.hirenodes.io/`
-  5. For "Ceramic Seed" simply click "generate a new one" and go to the next page
-  6. For "Database configuration" enter the following:
-    ```sh
-    User=postgres
-    Database=postgres
-    Password=postgres
-    Host=localhost
-    Port=5432
-    ```
-  7. Click next on the presets page (do not select anything)
-  8. Connect with your Metamask account and click "Get started"
-  9. Navigate to your browser running the OrbisDB UI and create a new context. You can call this anything you want. Once saved, click into your new context and copy the value prefixed with "k" into your `.env` file to `ORBIS_CONTEXT_ID`
-  10. Back in the root of the ai-agent-starter-kit directory, generate an OrbisDB seed to self-authenticate onto the Ceramic network and save to `ORBIS_SEED`:
-    ```sh
-    pnpm gen-seed
-    ```
-  11. Finally, deploy your OrbisDB data model we will use to create and query via vector search (requires your OrbisDB server to be running). Copy the value prefixed with "k" into your `.env` file next to `TABLE_ID`:
+  3. Finally, deploy your OrbisDB data model we will use to create and query via vector search. Copy the value prefixed with "k" into your `.env` file next to `ORBIS_TABLE_ID`:
     ```sh
     pnpm deploy-model
     ```
+
+  4. You can use the default provided values for `ORBIS_GATEWAY_URL` AND `CERAMIC_NODE_URL` provided in your .env.example file as-is
 
 **Note**: For production, update the Homepage URL and callback URL to your production domain.
 

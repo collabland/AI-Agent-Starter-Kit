@@ -1,6 +1,5 @@
 import { OrbisDB } from "@useorbis/db-sdk";
 import { OrbisKeyDidAuth } from "@useorbis/db-sdk/auth";
-import { type } from "os";
 
 const db = new OrbisDB({
   ceramic: {
@@ -8,7 +7,8 @@ const db = new OrbisDB({
   },
   nodes: [
     {
-      gateway: "http://localhost:7008",
+      gateway: "https://studio.useorbis.com",
+      env: process.env.ORBIS_ENV,
     },
   ],
 });

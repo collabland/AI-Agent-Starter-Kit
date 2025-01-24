@@ -36,6 +36,9 @@ export class Orbis {
     if (!process.env.ORBIS_TABLE_ID) {
       message += "ORBIS_TABLE_ID is not defined in the environment variables. ";
     }
+    if (!process.env.ORBIS_ENV) {
+      message += "ORBIS_ENV is not defined in the environment variables. ";
+    }
     if (!process.env.ORBIS_CONTEXT_ID) {
       message +=
         "ORBIS_CONTEXT_ID is not defined in the environment variables. ";
@@ -56,6 +59,7 @@ export class Orbis {
       nodes: [
         {
           gateway: process.env.ORBIS_GATEWAY_URL!,
+          env: process.env.ORBIS_ENV!,
         },
       ],
     });
