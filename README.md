@@ -4,7 +4,7 @@ A modern full-stack AI-enabled template using Next.js for frontend and Express.j
 
 > [!IMPORTANT]
 > The AI Agent Starter Kit is powered by the Collab.Land AccountKit APIs
-> 
+>
 > More information here: https://accountkit-docs-qa.collab.land/
 
 ## 🎯 Cursor IDE Integration
@@ -232,6 +232,19 @@ pnpm run dev
      GITHUB_CLIENT_ID=1234567890abcdef1234
      GITHUB_CLIENT_SECRET=1234567890abcdef1234567890abcdef12345678
      ```
+
+- `NEVERMINED_`: Connection information for the Nevermined SDK
+
+  1. Go to [Using default Developer values](https://docs.nevermined.io/docs/nevermined-sdk/getting-started/)
+
+```bash
+NEVERMINED_WEB3_PROVIDER_URI=https://sepolia-rollup.arbitrum.io/rpc
+NEVERMINED_MARKETPLACE_URI=https://marketplace-api.testing.nevermined.app
+NEVERMINED_NODE_URI=https://node.testing.nevermined.app
+NEVERMINED_NODE_ADDRESS=0x5838B5512cF9f12FE9f2beccB20eb47211F9B0bc
+MARKETPLACE_AUTH_TOKEN=
+ARTIFACTS_FOLDER=./artifacts
+```
 
 **Note**: For production, update the Homepage URL and callback URL to your production domain.
 

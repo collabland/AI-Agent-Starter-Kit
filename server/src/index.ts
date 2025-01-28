@@ -10,6 +10,7 @@ import { TelegramService } from "./services/telegram.service.js";
 import { IService } from "./services/base.service.js";
 import twitterRouter from "./routes/twitter.js";
 import discordRouter from "./routes/discord.js";
+import neverminedRouter from "./routes/nevermined.js";
 import cookieParser from "cookie-parser";
 import githubRouter from "./routes/github.js";
 import { AnyType } from "./utils.js";
@@ -56,6 +57,9 @@ app.use("/auth/discord", discordRouter);
 
 // Mount GitHub OAuth routes
 app.use("/auth/github", githubRouter);
+
+// Mount Nevermined SDK routes
+app.use("/nevermined", neverminedRouter);
 
 // 404 handler
 app.use((_req: Request, _res: Response, _next: NextFunction) => {
