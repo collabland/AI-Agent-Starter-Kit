@@ -18,6 +18,7 @@
     "@ai16z/eliza": "0.1.5-alpha.3",
     "@ai16z/plugin-bootstrap": "0.1.5-alpha.3",
     "@grammyjs/conversations": "^1.2.0",
+    "@nevermined-io/sdk": "^3.1.0",
     "@ngrok/ngrok": "^1.4.1",
     "@solana/web3.js": "^1.98.0",
     "agent-twitter-client": "^0.0.18",
