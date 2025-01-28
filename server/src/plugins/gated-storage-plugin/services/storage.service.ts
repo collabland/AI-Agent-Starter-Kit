@@ -80,11 +80,18 @@ export class StorageService {
   /// Must call `start()` before using this the first time
   isConfigured(): boolean {
     if (!this.orbis) {
-      elizaLogger.warn(
+      elizaLogger.info(
         "[storage.service] Orbis is not initialized. Gated data is disabled."
       );
       return false;
     }
+    if (!OPENAI_EMBEDDINGS) {
+      elizaLogger.info(
+        "[storage.service] Not using OPENAI embeddings. Gated data is disabled."
+      );
+      return false;
+    }
+    // warn for these as it'd be weird for them to be misconfigured if the above are enabled
     if (!this.encryptActionHash) {
       elizaLogger.warn(
         "[storage.service] Encrypt action hash is not initialized. Gated data is disabled."
@@ -100,12 +107,6 @@ export class StorageService {
     if (!this.client) {
       elizaLogger.warn(
         "[storage.service] is not initialized. Gated data is disabled."
-      );
-      return false;
-    }
-    if (!OPENAI_EMBEDDINGS) {
-      elizaLogger.warn(
-        "[storage.service] Not using OPENAI embeddings. Gated data is disabled."
       );
       return false;
     }
