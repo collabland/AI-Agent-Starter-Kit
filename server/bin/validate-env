@@ -60,13 +60,19 @@ const ENV_HINTS = {
     "Enter your Twitter access token secret, you can get it from Twitter Developer Portal, go to https://developer.twitter.com/en/portal/dashboard to create one",
   // Add more hints as needed from .env.example
   ORBIS_CONTEXT_ID:
-    "Enter your Orbis Context ID. Set up in your Orbis UI on localhost:7008 after starting server",
+    "(optional - gated data) Visit the Orbis Studio (https://studio.useorbis.com/) and log in with your browser wallet. Once logged in, set up a new context under the `Contexts` tab and use the value here",
+  ORBIS_ENV:
+    "(optional - gated data) On the right-hand side of Orbis Studio contexts, you should see a variable called 'Environment ID' (a DID representation of the address you used to sign in). Use that value here",
   ORBIS_TABLE_ID:
-    "Orbis embeddings table ID e.g. 'kjzl6hvfrbw6ca77573ixbqbfvz8062vg2rw7rwude5baqeob9koy4jhvsmois7'. Replace it with your own table ID with pnpm run deploy-model",
+    "(optional - gated data) Orbis embeddings table ID e.g. 'kjzl6hvfrbw6ca77573ixbqbfvz8062vg2rw7rwude5baqeob9koy4jhvsmois7'. Replace it with your own table ID with `pnpm run deploy-model`",
   ORBIS_SEED:
-    "e.g. [2, 19, ..., 241]. Replace it with your own seed with pnpm run gen-seed",
-  ORBIS_GATEWAY_URL: "Your local Orbis server URL e.g. http://localhost:7008",
-  CERAMIC_NODE_URL: "https://ceramic-orbisdb-mainnet-direct.hirenodes.io/",
+    "(optional - gated data) For example, [2, 20, ..., 241]. Replace it with your own seed with `pnpm run gen-seed`",
+  ORBIS_GATEWAY_URL:
+    "optional - gated data) Your local Orbis server URL e.g. http://localhost:7008 or the hosted instance at https://studio.useorbis.com",
+  CERAMIC_NODE_URL:
+    "(optional - gated data) https://ceramic-orbisdb-mainnet-direct.hirenodes.io/",
+  USE_OPENAI_EMBEDDING:
+    "(optional - gated data) must be TRUE to use gated data functionality",
 };
 
 const rl = readline.createInterface({
