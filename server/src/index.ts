@@ -12,6 +12,7 @@ import twitterRouter from "./routes/twitter.js";
 import discordRouter from "./routes/discord.js";
 import cookieParser from "cookie-parser";
 import githubRouter from "./routes/github.js";
+import emberRouter from "./routes/ember.js";
 import { AnyType } from "./utils.js";
 import { isHttpError } from "http-errors";
 
@@ -43,6 +44,9 @@ app.use("/hello", helloRouter);
 
 // Initialize Telegram bot service
 const telegramService = TelegramService.getInstance();
+
+// Mount Ember AGI TypeScript SDK routes
+app.use("/ember", emberRouter);
 
 // Mount Telegram webhook endpoint
 app.use("/telegram/webhook", telegramService.getWebhookCallback());

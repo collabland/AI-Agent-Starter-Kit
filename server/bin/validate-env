@@ -73,6 +73,9 @@ const ENV_HINTS = {
     "[Press enter/return to skip] (optional - gated data) https://ceramic-orbisdb-mainnet-direct.hirenodes.io/",
   USE_OPENAI_EMBEDDING:
     "[Press enter/return to skip] (optional - gated data) must be TRUE to use gated data functionality",
+  EMBER_API_KEY: "Enter your Ember API key",
+  EMBER_ENDPOINT_URL:
+    "Enter your Ember endpoint URL with port, usually api.emberai.xyz:443",
 };
 
 const rl = readline.createInterface({
