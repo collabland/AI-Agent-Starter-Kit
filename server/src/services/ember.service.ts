@@ -83,14 +83,14 @@ export class EmberService extends BaseService {
       );
 
       const swap = await client.swapTokens({
-        type: OrderType.MARKET_BUY,
+        orderType: OrderType.MARKET_BUY,
         baseToken: {
           chainId: ethereum.chainId,
-          tokenId: baseToken?.tokenId as string,
+          address: baseToken?.tokenId as string,
         },
         quoteToken: {
           chainId: ethereum.chainId,
-          tokenId: quoteToken?.tokenId as string,
+          address: quoteToken?.tokenId as string,
         },
         amount: action.params.amount,
         recipient: account.address,
