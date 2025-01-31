@@ -28,7 +28,8 @@ export class EmberService extends BaseService {
   public static getClient(): EmberClient {
     if (!EmberService.client) {
       EmberService.client = new EmberClient({
-        endpoint: process.env.EMBER_ENDPOINT_URL || "api.emberai.xyz:443",
+        endpoint:
+          process.env.EMBER_ENDPOINT_URL || "grpc.api.emberai.xyz:50051",
         apiKey: process.env.EMBER_API_KEY || "",
       });
     }
