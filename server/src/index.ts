@@ -14,6 +14,7 @@ import cookieParser from "cookie-parser";
 import githubRouter from "./routes/github.js";
 import { AnyType } from "./utils.js";
 import { isHttpError } from "http-errors";
+import { NeverminedService } from "./services/nevermined.service.js";
 
 // Convert ESM module URL to filesystem path
 const __filename = fileURLToPath(import.meta.url);
@@ -100,6 +101,12 @@ app.listen(port, async () => {
 
     const botInfo = await telegramService.getBotInfo();
     console.log("Telegram Bot URL:", `https://t.me/${botInfo.username}`);
+
+    if (process.env.NEVERMINED_API_KEY) {
+      const neverminedService = await NeverminedService.getInstance();
+      await neverminedService.start();
+      services.push(neverminedService);
+    }
   } catch (e) {
     console.error("Failed to start server:", e);
     process.exit(1);
