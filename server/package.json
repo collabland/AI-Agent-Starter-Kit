@@ -38,7 +38,8 @@
     "jsonc-parser": "^3.3.1",
     "node-cache": "^5.1.2",
     "prettier": "^3.4.2",
-    "tsc-watch": "^6.2.1"
+    "tsc-watch": "^6.2.1",
+    "viem": "^2.22.17"
   },
   "devDependencies": {
     "@typechain/ethers-v6": "^0.5.1",

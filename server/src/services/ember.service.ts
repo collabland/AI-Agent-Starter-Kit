@@ -1,6 +1,7 @@
 import { BaseService } from "./base.service.js";
 import EmberClient from "@emberai/sdk-typescript";
 import { OrderType, SwapTokensResponse } from "@emberai/sdk-typescript";
+import { privateKeyToAccount } from "viem/accounts";
 
 export interface AgentSwapAction {
   type: "SWAP" | "YIELD" | "BALANCE_CHECK";
@@ -20,7 +21,7 @@ export interface AgentSwapAction {
 export class EmberService extends BaseService {
   private static client: EmberClient;
 
-  private constructor() {
+  public constructor() {
     super();
   }
 
@@ -34,11 +35,19 @@ export class EmberService extends BaseService {
     return EmberService.client;
   }
 
+  /**
+   * executeSwap - Executes a swap between two tokens
+   * @param action
+   * @returns
+   */
   public async executeSwap(
     action: AgentSwapAction
   ): Promise<SwapTokensResponse | void> {
+    this.start();
+
     try {
-      const client = EmberService.client;
+      const client = EmberService.getClient();
+
       const { chains } = await client.getChains({
         pageSize: 10,
         filter: "",
@@ -48,18 +57,42 @@ export class EmberService extends BaseService {
       const ethereum = chains.find((c) => c.name.toLowerCase() === "ethereum");
       if (!ethereum) throw new Error("Chain not found");
 
+      // Get tokens on Ethereum
+      const { tokens } = await client.getTokens({
+        chainId: ethereum.chainId,
+        pageSize: 100,
+        filter: "",
+        pageToken: "",
+      });
+
+      // Find USDC and WETH tokens
+      const baseToken = tokens.find(
+        (token) => token.symbol === action.params.baseToken
+      );
+      const quoteToken = tokens.find(
+        (token) => token.symbol === action.params.quoteToken
+      );
+
+      if (!baseToken || !quoteToken) {
+        throw new Error("Required tokens not found");
+      }
+
+      const account = privateKeyToAccount(
+        action.params.recipient as `0x${string}`
+      );
+
       const swap = await client.swapTokens({
         type: OrderType.MARKET_BUY,
         baseToken: {
           chainId: ethereum.chainId,
-          tokenId: action.params.baseToken,
+          tokenId: baseToken?.tokenId as string,
         },
         quoteToken: {
           chainId: ethereum.chainId,
-          tokenId: action.params.quoteToken,
+          tokenId: quoteToken?.tokenId as string,
         },
         amount: action.params.amount,
-        recipient: action.params.recipient,
+        recipient: account.address,
       });
 
       action.status = "EXECUTED";
