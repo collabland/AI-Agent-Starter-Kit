@@ -4,7 +4,7 @@ import { OrderType, SwapTokensResponse } from "@emberai/sdk-typescript";
 import { privateKeyToAccount } from "viem/accounts";
 
 export interface AgentSwapAction {
-  type: "SWAP" | "YIELD" | "BALANCE_CHECK";
+  type: "MARKET_BUY" | "MARKET_SELL";
   params: {
     baseToken: string;
     quoteToken: string;

@@ -78,7 +78,7 @@ router.post("/agent/swap", async (req: Request, res: Response) => {
     const ember = new EmberService();
 
     const action: AgentSwapAction = {
-      type: "SWAP",
+      type: "MARKET_BUY",
       params: {
         baseToken,
         quoteToken,
